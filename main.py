@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
-# TODO написать основной скрипт для функции "ass"
-# TODO оформить базу данных
-# TODO написать диалоги
-# TODO написать нормально отчёты и сравнивание за временем
-
 import config
 import json
 import random
