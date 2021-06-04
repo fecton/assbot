@@ -42,7 +42,7 @@ def ass_main(ass_info, db):
 
     if tmp_length == 0:
         # message with no profit
-        output_message += "не сменила размера. "
+        output_message += "не змінила розміру. "
     elif tmp_length > 0:
         # message with profit
         output_message += ("підросла на {0} см! Зараз твоя дупця прям бомбезна. ".format(tmp_length))
@@ -143,14 +143,15 @@ async def ass(message: types.Message):
             if int(time.time()) >= ass_info[4]:
                 await message.reply(ass_main(ass_info, db))
             else:
-                last_time = ass_info[4] - int(time.time())
-                minutes = last_time // 60
-                hours = last_time // 3600
-
-                minutes -= hours * 60
-                ass_main(ass_info, db)
                 if not ass_info[6]:
                     if not ass_info[5] >= 5:
+                        last_time = ass_info[4] - int(time.time())
+                        minutes = last_time // 60
+                        hours = last_time // 3600
+
+                        minutes -= hours * 60
+                        ass_main(ass_info, db)
+
                         if hours == 0:
                             await message.reply(
                                 "@{0}, ти вже грав! Зачекай {1} хв.".format(ass_info[1], minutes)
@@ -166,10 +167,10 @@ async def ass(message: types.Message):
                         """.format(ass_info[5], ass_info[0]))
                     else:
                         db.execute("""
-                            UPDATE `users` SET blacklisted=1 WHERE id={0}
+                            UPDATE `users` SET blacklisted=1, length=0 WHERE id={0}
                         """.format(ass_info[0]))
                 else:
-                    await message.reply("{0}, я тобі попку збільшую, а ти мені спамиш. Мені взагалі-то теж не солодко постійно вам попу міряти. Все, дружок, тепер ти мене не будеш зайобувати. Ти в муті.".format(ass_info[2]))
+                    await message.reply("{0}, я тобі попку збільшую, а ти мені спамиш. Мені взагалі-то теж не солодко постійно вам попу міряти. Все, дружок, тепер ти мене не будеш зайобувати — т/и в муті.".format(ass_info[2]))
 
 
         db.commit()
@@ -194,12 +195,21 @@ async def top(message : types.Message):
     i = 1
     output_message = "Рейтинг гравців:\n\n"
 
+    emojis = ["👑 ", "🥇 ", "🥈 ", "🥉 ", "😈 ", "😇"]
+
     for user_data in users_data:
-        if not user_data[3]:
-            output_message += "{0}. {1} — не має сіднички\n".format(i, user_data[2], user_data[3])
+        try:
+            output_message += emojis[i-1]
+        except IndexError:
+            pass
+        if user_data[6]:
+            output_message += "{0}. {1} залишився без дупи через спам\n".format(i, user_data[2])
         else:
-            output_message += "{0}. {1} — {2} см\n".format(i, user_data[2], user_data[3])
-        i += 1
+            if not user_data[3]:
+                output_message += "{0}. {1} — не має сіднички\n".format(i, user_data[2], user_data[3])
+            else:
+                output_message += "{0}. {1} — {2} см\n".format(i, user_data[2], user_data[3])
+            i += 1
 
     await message.reply(output_message)
 
@@ -233,15 +243,17 @@ async def leave(message: types.Message):
 async def menu(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-    buttons = [
+    keyboard.row(
         types.KeyboardButton(text="/ass"),
         types.KeyboardButton(text="/leave"),
+    )
+
+    keyboard.row(
         types.KeyboardButton(text="/help"),
         types.KeyboardButton(text="/statistic")
-    ]
+    )
 
-    keyboard.add(*buttons)
-    await message.reply("Меню открыто: ",reply_markup=keyboard)
+    await message.reply("Звичайно, друже: ",reply_markup=keyboard)
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
