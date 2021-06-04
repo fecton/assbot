@@ -13,6 +13,8 @@ import sqlite3
 import os
 import time
 
+from aiogram import Bot, Dispatcher, executor, types
+
 queries = {
     "create_table" : """
         CREATE TABLE `users`(
@@ -20,18 +22,57 @@ queries = {
                 username    TEXT                    NOT NULL,
                 name        TEXT                    NOT NULL,
                 length      INTEGER                 NOT NULL,
-                starttime   INTEGER                 NOT NULL,
                 endtime     INTEGER                 NOT NULL
             );
     """,
     "put_user" : """
-        INSERT INTO `users`(id,username, name, length, starttime, endtime)
-        VALUES (?,?,?,?,?,?)
+        INSERT INTO `users`(id,username, name, length, endtime)
+        VALUES (?,?,?,?,?)
     """
 }
 
+def ass_main(ass_info, db):
+    tmp_length = random.randint(-10, 10)
 
-from aiogram import Bot, Dispatcher, executor, types
+    output_message = "@{0}, твоя жопка ".format(ass_info[1])
+
+    if tmp_length == 0:
+        # message with no profit
+        output_message += "не сменила размера. "
+    elif tmp_length > 0:
+        # message with profit
+        output_message += ("увеличилась на {0}! ".format(tmp_length))
+    elif tmp_length < 0:
+        # message with bad profit
+        output_message += ("уменьшилась на {0}! ".format(tmp_length * -1))
+
+    ass_info = list(ass_info)
+    ass_info[3] = ass_info[3] + tmp_length
+
+    if ass_info[3] < 0:
+        ass_info[3] = 0
+        output_message += "Зараз ти не маєш файного заду."
+    else:
+        output_message += "Текущий размер жопки: {0} см. ".format(ass_info[3])
+
+    # write to database
+    timeleft = random.randint(3600, 86400)
+    end_time = int(time.time()) + timeleft
+
+    last_time = end_time - int(time.time())
+
+    if last_time < 0:
+        minutes = ((last_time // 60) - (last_time // 3600) * 60) * -1
+        hours = last_time // 3600 * -1
+    else:
+        minutes = (last_time // 60) - (last_time // 3600) * 60
+        hours = last_time // 3600
+    output_message += "Продолжай играть через {0} ч., {1} м.".format(hours, minutes)
+    db.execute("""
+            UPDATE `users` SET length={0}, endtime={2} WHERE id={1}
+        """.format(ass_info[3], ass_info[0], end_time))
+
+    return output_message
 
 # database initialization
 
@@ -53,7 +94,7 @@ if config.DEBUG == True:
     print("[!] WARNING! DEBUG mode is on!")
     @dp.message_handler(commands=["ass","help"])
     async def ass(message: types.Message):
-        await message.answer("ВКЛЮЧЕН РЕЖИМ ОТКЛАДКИ! БОТ НЕ РАБОТАЕТ!")
+        await message.reply("ВКЛЮЧЕН РЕЖИМ ОТКЛАДКИ! БОТ НЕ РАБОТАЕТ!")
 
     if __name__ == "__main__":
         executor.start_polling(dp, skip_updates=True)
@@ -61,10 +102,15 @@ if config.DEBUG == True:
 # dialogs
 content = json.loads( open("dialogs.json","r",encoding="utf8").read())
 # ass script
+
+@dp.message_handler(commands=["start"])
+async def ass(message: types.Message):
+    await message.reply(content["start"])
+
 @dp.message_handler(commands=["ass"])
 async def ass(message: types.Message):
-    if message.chat["id"] == "495137368":
-        await message.answer("Бот работает только в одной группе!")
+    if not message.chat["id"] != "495137368" or config.DEBUG:
+        await message.answer("Я працюю лише в деякій групі!")
     else:
         db = sqlite3.connect("list")
         # if user exists in database
@@ -73,68 +119,61 @@ async def ass(message: types.Message):
         SELECT * FROM `users` WHERE id={0}
         """.format(message.from_user["id"]))
         ass_info = cursor.fetchone()
-        await message.answer(ass_info)
+
         if ass_info is None:
-            userinfo = (message.from_user["id"], message.from_user["username"], message.from_user["first_name"], 0, 1, 0)
+            userinfo = (message.from_user["id"], message.from_user["username"], message.from_user["first_name"], 0, 0)
             db.execute(queries["put_user"], userinfo)
-            await message.answer("joined")
+            cursor = db.execute("""
+            SELECT * FROM `users` WHERE id={0}
+            """.format(message.from_user["id"]))
+            ass_info = cursor.fetchone()
+            await message.reply("@{0}, вітаю в нашій когорті, хлопче/дівчино".format(ass_info[1]))
+            await message.reply(ass_main(ass_info, db))
         else:
-            # ass script
-            if ass_info[4] >= ass_info[5]:
-
-                tmp_length = random.randint(-10, 15)
-
-                if tmp_length == 0:
-                    # message with no profit
-                    await message.answer("Размер не поменялся")
-                elif tmp_length > 0:
-                    # message with profit
-                    await message.answer("Увеличилась на {0}".format(tmp_length))
-                elif tmp_length < 0:
-                    # message with bad profit
-                    await message.answer("Уменьшилась на {0}!".format(tmp_length * -1))
-
-                ass_info = list(ass_info)
-                ass_info[3] = ass_info[3]+tmp_length
-
-                if ass_info[3] < 0:
-                    ass_info[3] = 0
-
-                await message.answer("Текущий размер: {0}".format(ass_info[3]))
-
-                # write to database
-
-                timeleft = random.randint(3600, 86400)
-
-                start_time = int(time.time())
-                end_time = time.time() + timeleft
-
-                db.execute("""
-                    UPDATE `users` SET length={0}, starttime={1}, endtime={2} WHERE id={1}
-                """.format(ass_info[3], ass_info[0], start_time, end_time))
+            if int(time.time()) >= ass_info[4]:
+                await message.reply(ass_main(ass_info, db))
             else:
-                last_time = int(time.time()) - ass_info[5]
-                print(time.localtime(last_time))
-                # await message.answer("Waiting time didn't end, please wait {0} hours and {1} minutes".format())
+                last_time = ass_info[4] - int(time.time())
+                minutes = last_time // 60
+                hours = last_time // 3600
+
+                minutes -= hours * 60
+
+                if hours == 0:
+                    await message.reply(
+                        "@{0}, ти вже грав! Зачекай {1} хв.".format(ass_info[1], minutes)
+                    )
+                else:
+                    await message.reply(
+                        "@{0}, ти вже грав! Зачекай {1} год., {2} хв.".format(ass_info[1], hours, minutes)
+                    )
 
         db.commit()
         db.close()
-        # await message.answer("[+] Operation is completed!")
 
 # help
 @dp.message_handler(commands=["help"])
 async def help(message: types.Message):
-    await message.answer(content["help"])
+    await message.reply(content["help"])
 
 @dp.message_handler(commands=["leave"])
 async def leave(message: types.Message):
     db = sqlite3.connect("list")
-    db.execute("""
-        DELETE FROM `users` WHERE id={0}
+
+    cursor = db.execute("""
+    SELECT * FROM `users` WHERE id={0}
     """.format(message.from_user["id"]))
+    ass_info = cursor.fetchone()
+    if not ass_info:
+        await message.reply("Ти не був зарегестрований у грі!")
+    else:
+        db.execute("""
+            DELETE FROM `users` WHERE id={0}
+        """.format(message.from_user["id"]))
+        await message.reply("Ти покинув гру! Шкода такий гарний зад.")
     db.commit()
     db.close()
-    await message.reply("Вы вышли из игры! Данные о вашей жопке удалены!")
+
 
 # menu
 @dp.message_handler(commands=["menu"])
@@ -152,9 +191,3 @@ async def menu(message: types.Message):
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
-
-
-
-
-
-
