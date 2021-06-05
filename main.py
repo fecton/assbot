@@ -177,8 +177,8 @@ async def ass(message: types.Message):
 @dp.message_handler(lambda message: "/report" in message.text)
 async def report(message: types.Message):
 
-    if len(message.text[8:].strip()) == 0:
-        if len(message.text[8:]) < 15:
+    if len(message.text[8:]) < 15:
+        if len(message.text[8:].strip()) == 0:
             await message.reply("Нічого не забув?")
         else:
             await message.reply("Звіт дуже малий!")
