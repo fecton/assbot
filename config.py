@@ -1,3 +1,6 @@
-TOKEN = "1777031958:AAF4O-_GmkvFJvhP7cVlxa697Y48rUPC4Hc"
+# here is your token
+TOKEN = ""
+# some feature
 DEBUG = False
-SUPER_USERS = [817810926]
+# here are admins' id (integer)
+SUPER_USERS = [] #
