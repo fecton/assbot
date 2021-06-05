@@ -234,9 +234,8 @@ async def clear_reports(message: types.Message):
 # ass script
 @dp.message_handler(commands=["ass"])
 async def ass(message: types.Message):
-    if not message.chat["id"] in config.SUPER_USERS:
-        if message.chat["id"] != "495137368":
-            await message.answer("Я працюю лише в деякій групі!")
+    if not (message.chat["id"] in ([495137368] + config.SUPER_USERS)):
+        await message.answer("Я працюю лише в деякій групі!")
     else:
         db = sqlite3.connect("list")
         # if user exists in database
