@@ -331,9 +331,7 @@ async def slap(message: types.Message):
     username = message.text[6:]
 
     db = sqlite3.connect("list")
-    cursor = db.execute("""
-        SELECT * FROM `users` WHERE username={0}
-    """.format(username))
+    cursor = db.execute("SELECT * FROM `users` WHERE username={0}".format(username))
 
     await message.reply(cursor.fetchone())
 
