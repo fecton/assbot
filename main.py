@@ -179,7 +179,7 @@ async def report(message: types.Message):
 
     if len(message.text[3:]) < 15:
         if len(message.text[8:].strip()) == 0:
-            await message.reply("Нічого не забув?")
+            await message.reply("Ти забув уввести свій звіт!")
         else:
             await message.reply("Звіт дуже малий!")
     else:
