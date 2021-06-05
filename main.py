@@ -136,7 +136,14 @@ if config.DEBUG:
         executor.start_polling(dp, skip_updates=True)
 
 # dialogs
-content = json.loads(open("dialogs.json", "r", encoding="utf8").read())
+# if you want to read from json-file
+# content = json.loads(open("dialogs.json", "r", encoding="utf8").read())
+
+content = {
+  "start"       : "\uD83D\uDC4B Вітаю в нашій когорті, хлопче/дівчино!\nЦей ботик допоможе тобі файно провести вільний час, граючись із розмірами твоїх ягідок. Скоріше приймай участь, buddy, та не зволікай, пиши /ass",
+  "help"        : "Не бійсь, ось усі команди:\n     \uD83C\uDF51  /ass — зіграти в нашу гру\n     \uD83D\uDD34  /help — побачити довідку\n     \uD83D\uDEB6\u200D♂️  /leave — покинути гру (УВАГА! УСІ ДАННІ ПІСЛЯ ПОКИДАННЯ БУДУТЬ ВИДАЛЕНІ!\n     \uD83D\uDE4B\u200D♂️ /r ваш_звіт — повідомити про недолік\n     \uD83D\uDCCA /statistic — показати рейтинг усіх гравців",
+  "admin_help"  : "Режим баті:\n     /blacklist — виводить заблокованих підорів \n     /ub {user_id} — видаляє користувача з бану\n     /show_reports — побачити звіти користувачів\n     /clear_reports — очищує звіти"
+}
 
 
 @dp.message_handler(lambda message: "/ub" in message.text)
