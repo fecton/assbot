@@ -216,7 +216,7 @@ async def show_reports(message: types.Message):
         reports = cursor.fetchall()
 
         if not reports:
-            await message.reply("Ще не нема звітів!")
+            await message.reply("Ще нема звітів!")
         else:
             output_message = "ID : USERNAME : NAME : MESSAGE\n\n"
             for report in reports:
