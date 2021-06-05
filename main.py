@@ -49,6 +49,10 @@ def ass_main(ass_info, db):
                 "@{0}, ти вже грав! Зачекай {1} хв.".format(ass_info[1], minutes)
             )
         else:
+            if minutes == 0:
+                output_message = (
+                    "@{0}, ти вже грав! Зачекай {1} год.".format(ass_info[1], hours)
+                )
             output_message = (
                 "@{0}, ти вже грав! Зачекай {1} год., {2} хв.".format(ass_info[1], hours, minutes)
             )
@@ -230,8 +234,9 @@ async def clear_reports(message: types.Message):
 # ass script
 @dp.message_handler(commands=["ass"])
 async def ass(message: types.Message):
-    if not message.chat["id"] != "495137368":
-        await message.answer("Я працюю лише в деякій групі!")
+    if not message.chat["id"] in config.SUPER_USERS:
+        if message.chat["id"] != "495137368":
+            await message.answer("Я працюю лише в деякій групі!")
     else:
         db = sqlite3.connect("list")
         # if user exists in database
