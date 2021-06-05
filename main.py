@@ -182,12 +182,12 @@ async def ass(message: types.Message):
 async def report(message: types.Message):
 
     if len(message.text[3:]) < 15:
-        if len(message.text[8:].strip()) == 0:
+        if len(message.text[3:].strip()) == 0:
             await message.reply("Ти забув уввести свій звіт!")
         else:
             await message.reply("Звіт дуже малий!")
     else:
-        data = ( message.from_user["id"], message.from_user["username"], message.from_user["first_name"], message.text[8:] )
+        data = ( message.from_user["id"], message.from_user["username"], message.from_user["first_name"], message.text[3:] )
         db = sqlite3.connect("list")
         db.execute("""
             INSERT INTO `reports` (id, username, name, message)
