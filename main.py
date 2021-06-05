@@ -137,15 +137,18 @@ async def unban(message : types.Message):
     if message.from_user["id"] in config.SUPER_USERS:
         id = message.text[7:].strip(" ")
 
-        db = sqlite3.connect("list")
-        db.execute("""
-            UPDATE `users` SET blacklisted=0, spamcount=0 WHERE id={0}
-        """.format( id ))
+        if not id:
+            await message.reply("Ти забув уввести номер підора!")
+        else:
+            db = sqlite3.connect("list")
+            db.execute("""
+                UPDATE `users` SET blacklisted=0, spamcount=0 WHERE id={0}
+            """.format( id ))
 
-        db.commit()
-        db.close()
+            db.commit()
+            db.close()
 
-        await message.reply("Користувач {0} може повернутися до гри!".format(id))
+            await message.reply("Користувач {0} може повернутися до гри!".format(id))
 
 @dp.message_handler(commands=["blacklist"])
 async def ass(message: types.Message):
