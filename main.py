@@ -11,7 +11,7 @@ import time
 from aiogram import Bot, Dispatcher, executor, types
 
 queries = {
-    "create_table" : """
+    "create_table": """
         CREATE TABLE `users`(
                 id          INTEGER     PRIMARY KEY NOT NULL,
                 username    VARCHAR(35)             NOT NULL,
@@ -22,11 +22,11 @@ queries = {
                 blacklisted BOOLEAN                 NOT NULL
             );
     """,
-    "put_user" : """
+    "put_user": """
         INSERT INTO `users`(id,username, name, length, endtime, spamcount, blacklisted)
         VALUES (?,?,?,?,?,?,?)
     """,
-    "report_table" : """
+    "report_table": """
         CREATE TABLE `reports` (
             id          INTEGER        NOT NULL,
             username    VARCHAR(35)    NOT NULL,
@@ -36,9 +36,9 @@ queries = {
     """
 }
 
+
 def ass_main(ass_info, db):
     if ass_info[4] > int(time.time()):
-        output_message = ""
 
         last_time = ass_info[4] - int(time.time())
         hours = int(last_time / 3600)
@@ -53,9 +53,10 @@ def ass_main(ass_info, db):
                 output_message = (
                     "@{0}, ти вже грав! Зачекай {1} год.".format(ass_info[1], hours)
                 )
-            output_message = (
-                "@{0}, ти вже грав! Зачекай {1} год., {2} хв.".format(ass_info[1], hours, minutes)
-            )
+            else:
+                output_message = (
+                    "@{0}, ти вже грав! Зачекай {1} год., {2} хв.".format(ass_info[1], hours, minutes)
+                )
 
         ass_info = list(ass_info)
         ass_info[5] += 1
@@ -63,7 +64,6 @@ def ass_main(ass_info, db):
             UPDATE `users` SET spamcount={0} WHERE id={1}
         """.format(ass_info[5], ass_info[0]))
     else:
-        output_message = ""
         tmp_length = random.randint(-10, 15)
         output_message = "@{0}, твоя дупця ".format(ass_info[1])
 
@@ -108,6 +108,7 @@ def ass_main(ass_info, db):
 
 # database initialization
 
+
 if "list" in os.listdir("."):
     print("[+] Everything is fine!")
 else:
@@ -124,8 +125,9 @@ else:
 bot = Bot(config.TOKEN)
 dp = Dispatcher(bot)
 
-if config.DEBUG == True:
+if config.DEBUG:
     print("[!] WARNING! DEBUG mode is on!")
+
     @dp.message_handler(commands=["ass"])
     async def ass(message: types.Message):
         await message.reply("ВКЛЮЧЕН РЕЖИМ ОТКЛАДКИ! БОТ НЕ РАБОТАЕТ!")
@@ -134,10 +136,11 @@ if config.DEBUG == True:
         executor.start_polling(dp, skip_updates=True)
 
 # dialogs
-content = json.loads( open("dialogs.json","r",encoding="utf8").read())
+content = json.loads(open("dialogs.json", "r", encoding="utf8").read())
 
-@dp.message_handler(lambda message: "/ub" in message.text )
-async def unban(message : types.Message):
+
+@dp.message_handler(lambda message: "/ub" in message.text)
+async def unban(message: types.Message):
     if message.from_user["id"] in config.SUPER_USERS:
         id = message.text[4:].strip(" ")
 
@@ -147,12 +150,13 @@ async def unban(message : types.Message):
             db = sqlite3.connect("list")
             db.execute("""
                 UPDATE `users` SET blacklisted=0, spamcount=0 WHERE id={0}
-            """.format( id ))
+            """.format(id))
 
             db.commit()
             db.close()
 
             await message.reply("Користувач {0} може повернутися до гри!".format(id))
+
 
 @dp.message_handler(commands=["blacklist"])
 async def ass(message: types.Message):
@@ -174,9 +178,11 @@ async def ass(message: types.Message):
 
             await message.reply(output_message)
 
+
 @dp.message_handler(commands=["start"])
 async def ass(message: types.Message):
     await message.reply(content["start"])
+
 
 @dp.message_handler(lambda message: "/r" in message.text)
 async def report(message: types.Message):
@@ -187,19 +193,20 @@ async def report(message: types.Message):
         else:
             await message.reply("Звіт дуже малий!")
     else:
-        data = ( message.from_user["id"], message.from_user["username"], message.from_user["first_name"], message.text[3:] )
+        data = (message.from_user["id"], message.from_user["username"], message.from_user["first_name"], message.text[3:])
         db = sqlite3.connect("list")
         db.execute("""
             INSERT INTO `reports` (id, username, name, message)
             VALUES (?, ?, ?, ?)
-        """, data )
+        """, data)
         db.commit()
         db.close()
         await message.reply("Дякуємо за звіт! 💛")
         print("[R] A report had sent!")
 
+
 @dp.message_handler(commands=["show_reports"])
-async def show_reports(message : types.Message):
+async def show_reports(message: types.Message):
     if message.from_user["id"] in config.SUPER_USERS:
         db = sqlite3.connect("list")
         cursor = db.execute("""
@@ -219,6 +226,7 @@ async def show_reports(message : types.Message):
 
             await message.reply(output_message)
 
+
 @dp.message_handler(commands=["clear_reports"])
 async def clear_reports(message: types.Message):
     if message.from_user["id"] in config.SUPER_USERS:
@@ -232,6 +240,8 @@ async def clear_reports(message: types.Message):
         await message.reply("Звіти повністю очищені!")
 
 # ass script
+
+
 @dp.message_handler(commands=["ass"])
 async def ass(message: types.Message):
     if not (message.chat["id"] in ([495137368] + config.SUPER_USERS)):
@@ -270,14 +280,14 @@ async def ass(message: types.Message):
                 else:
                     await message.reply("{0}, дружок, ти вже награвся, шуруй звідси.".format(ass_info[2]))
 
-
         db.commit()
         db.close()
 
 # help
 
+
 @dp.message_handler(commands=["statistic"])
-async def statistic(message : types.Message):
+async def statistic(message: types.Message):
     db = sqlite3.connect("list")
     try:
         cursor = db.execute("""
@@ -288,7 +298,6 @@ async def statistic(message : types.Message):
     except sqlite3.OperationalError:
         await message.reply("Нема гравців! Стань першим!")
         return
-
 
     if not users_data:
         await message.reply("Нема гравців! Стань першим!")
@@ -313,6 +322,7 @@ async def statistic(message : types.Message):
                 i += 1
 
         await message.reply(output_message)
+
 
 @dp.message_handler(commands=["leave"])
 async def leave(message: types.Message):
@@ -364,11 +374,13 @@ async def menu(message: types.Message):
         types.KeyboardButton(text="/statistic")
     )
 
-    await message.reply("Звичайно, друже: ",reply_markup=keyboard)
+    await message.reply("Звичайно, друже: ", reply_markup=keyboard)
+
 
 @dp.message_handler(commands=["help"])
 async def help(message: types.Message):
     await message.reply(content["help"])
+
 
 @dp.message_handler(commands=["admin_help"])
 async def menu(message: types.Message):
