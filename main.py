@@ -132,10 +132,10 @@ if config.DEBUG == True:
 # dialogs
 content = json.loads( open("dialogs.json","r",encoding="utf8").read())
 
-@dp.message_handler(lambda message: "/unban" in message.text )
+@dp.message_handler(lambda message: "/ub" in message.text )
 async def unban(message : types.Message):
     if message.from_user["id"] in config.SUPER_USERS:
-        id = message.text[7:].strip(" ")
+        id = message.text[4:].strip(" ")
 
         if not id:
             await message.reply("Ти забув уввести номер підора!")
@@ -174,10 +174,10 @@ async def ass(message: types.Message):
 async def ass(message: types.Message):
     await message.reply(content["start"])
 
-@dp.message_handler(lambda message: "/report" in message.text)
+@dp.message_handler(lambda message: "/r" in message.text)
 async def report(message: types.Message):
 
-    if len(message.text[8:]) < 15:
+    if len(message.text[3:]) < 15:
         if len(message.text[8:].strip()) == 0:
             await message.reply("Нічого не забув?")
         else:
