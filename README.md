@@ -60,7 +60,10 @@
     <div>
         <ul>
             <li>
-                <b>/blacklist</b> — show banned users
+                <b>/admin_help</b> — show admin commands
+            </li>            
+            <li>
+                <b>/bl</b> — show banned users
             </li>
             <li>
                 <b>/ub {user_id}</b> — unban user
