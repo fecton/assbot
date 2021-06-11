@@ -371,20 +371,6 @@ async def leave(message: types.Message):
     else:
         await message.answer("Працює лише у групах!")
 
-"""
-@dp.message_handler(lambda message: "/slap" in message.text)
-async def slap(message: types.Message):
-    username = message.text[6:]
-
-    database = sqlite3.connect("list")
-    cursor = database.execute("SELECT * FROM `users` WHERE username={0}".format(username))
-
-    await message.reply(cursor.fetchone())
-
-    database.commit()
-    database.close()
-"""
-
 
 @dp.message_handler(commands=["menu"])
 async def menu(message: types.Message):
