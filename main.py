@@ -119,69 +119,37 @@ print("[+] Bot initialization was successfully!")
 content = json.loads(open("messages.json", "r", encoding="utf8").read())
 
 
-@dp.message_handler(commands=["start"])
-async def ass(message: types.Message):
-    await message.reply(content["start"])
-
-
-@dp.message_handler(lambda message: message.text[:2] == "/r")
-async def report(message: types.Message):
-    if len(message.text[3:]) < 10:
-        if len(message.text[3:].strip()) == 0:
-            await message.reply("Ти забув уввести свій звіт!")
-        else:
-            await message.reply("Звіт дуже малий!")
-    elif message.text[2] == "@":
-        await message.reply("Невірний формат!")
-    else:
-        data = (message.chat["id"], message.chat["title"],
-                message.from_user["id"], message.from_user["username"],
-                message.from_user["first_name"], message.text[3:])
-        database = sqlite3.connect("list")
-        database.execute("""
-            INSERT INTO `reports` (group_id, group_name, user_id, username, name, message)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, data)
-        database.commit()
-        database.close()
-        await message.reply("Дякуємо за звіт! 💛")
-        print("[R] A report had sent!")
-
-
 @dp.message_handler(commands=["ass"])
 async def ass(message: types.Message):
-    database = sqlite3.connect("list")
-
-    group_id = message.chat["id"] * -1
-    try:
-        database.execute("SELECT * FROM `%d`" % group_id)
-    except sqlite3.OperationalError:
-        # creating table with name by group_id
-
-        database.execute("""
-        CREATE TABLE `%d`(
-                user_id          INTEGER     PRIMARY KEY NOT NULL,
-                username    VARCHAR(35)             NOT NULL,
-                name        VARCHAR(255)            NOT NULL,
-                length      INTEGER                 NOT NULL,
-                endtime     INTEGER                 NOT NULL,
-                spamcount   INTEGER                 NOT NULL,
-                blacklisted BOOLEAN                 NOT NULL
-            );""" % group_id)
-
-        database.commit()
-        database.close()
-        print("[+] Table with name '%d' created successfully!" % group_id)
-
-    if message.chat["type"] == "private" or message.chat["id"] in config.SUPER_USERS:
+    if message.chat["type"] == "private":
         await message.answer("Я працюю лише в группах!")
     else:
+        database = sqlite3.connect("list")
+
         group_id = message.chat["id"]*-1
         user_id = message.from_user["id"]
         username = message.from_user["username"]
         first_name = message.from_user["first_name"]
 
-        database = sqlite3.connect("list")
+        try:
+            database.execute("SELECT * FROM `%d`" % group_id)
+        except sqlite3.OperationalError:
+            # creating table with name by group_id
+
+            database.execute("""
+            CREATE TABLE `%d`(
+                    user_id     INTEGER     PRIMARY KEY NOT NULL,
+                    username    VARCHAR(35)             NOT NULL,
+                    name        VARCHAR(255)            NOT NULL,
+                    length      INTEGER                 NOT NULL,
+                    endtime     INTEGER                 NOT NULL,
+                    spamcount   INTEGER                 NOT NULL,
+                    blacklisted BOOLEAN                 NOT NULL
+                );""" % group_id)
+
+            database.commit()
+            print("[+] Table with name '%d' (%s) created successfully!" % (group_id, message.chat["title"]))
+
         # if user exists in database
 
         cursor = database.execute("""
@@ -255,7 +223,7 @@ async def unban(message: types.Message):
 
         if message.chat["type"] != "private":
             if not message.text[4:]:
-                await message.reply("Ти забув уввести номер підора!")
+                await message.reply("Ти забув уввести ID заблокованого користувача!")
             else:
                 database = sqlite3.connect("list")
                 database.execute("""
@@ -268,6 +236,30 @@ async def unban(message: types.Message):
                 await message.reply("Користувач {0} може повернутися до гри!".format(id))
         else:
             await message.answer("Працює лишу у групах!")
+
+
+@dp.message_handler(lambda message: message.text[:2] == "/r")
+async def report(message: types.Message):
+    if len(message.text[3:]) < 10:
+        if len(message.text[3:].strip()) == 0:
+            await message.reply("Ти забув уввести свій звіт!")
+        else:
+            await message.reply("Звіт дуже малий!")
+    elif message.text[2] == "@":
+        await message.reply("Невірний формат!")
+    else:
+        data = (message.chat["id"]*-1, message.chat["title"],
+                message.from_user["id"], message.from_user["username"],
+                message.from_user["first_name"], message.text[3:])
+        database = sqlite3.connect("list")
+        database.execute("""
+            INSERT INTO `reports` (group_id, group_name, user_id, username, name, message)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, data)
+        database.commit()
+        database.close()
+        await message.reply("Дякуємо за звіт! 💛")
+        print("[R] A report had sent!")
 
 
 @dp.message_handler(commands=["show_reports"])
@@ -387,6 +379,11 @@ async def menu(message: types.Message):
     )
 
     await message.reply("Звичайно, друже: ", reply_markup=keyboard)
+
+
+@dp.message_handler(commands=["start"])
+async def ass(message: types.Message):
+    await message.reply(content["start"])
 
 
 @dp.message_handler(commands=["about"])
