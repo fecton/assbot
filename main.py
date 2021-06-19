@@ -54,13 +54,10 @@ def ass_main(ass_info, database, group_id):
         output_message = "@{0}, твоя дупця ".format(ass_info["username"])
 
         if tmp_length == 0:
-            # message with no profit
             output_message += "не змінила розміру. "
         elif tmp_length > 0:
-            # message with profit
             output_message += ("підросла на {0} см! Зараз твоя дупця прям бомбезна. ".format(tmp_length))
         elif tmp_length < 0:
-            # message with bad profit
             if not ass_info["length"] - tmp_length <= 0:
                 output_message += ("зменшилась на {0} см! Зараз твоя дупця вже не файна. ".format(tmp_length * -1))
 
@@ -76,12 +73,12 @@ def ass_main(ass_info, database, group_id):
 
         last_time = end_time - int(time.time())
 
-        if last_time < 0:
-            minutes = ((last_time // 60) - (last_time // 3600) * 60) * -1
-            hours = last_time // 3600 * -1
-        else:
+        if last_time >= 0:
             minutes = (last_time // 60) - (last_time // 3600) * 60
             hours = last_time // 3600
+        else:
+            minutes = ((last_time // 60) - (last_time // 3600) * 60) * -1
+            hours = last_time // 3600 * -1
 
         output_message += "Продовжуй грати через {0} год., {1} хв.".format(hours, minutes)
         database.execute("""
@@ -91,9 +88,7 @@ def ass_main(ass_info, database, group_id):
     return output_message
 
 
-if "list" in os.listdir("."):
-    print("[+] Everything is fine!")
-else:
+if "list" not in os.listdir("."):
     database = sqlite3.connect("list")
     database.execute("""
         CREATE TABLE `reports` (
@@ -108,6 +103,8 @@ else:
     print("[+] Report table is created successfully!")
     database.commit()
     database.close()
+else:
+    print("[+] Everything is fine!")
 
 # initialization
 
@@ -168,22 +165,22 @@ async def ass(message: types.Message):
             SELECT * FROM `{0}` WHERE user_id={1}
             """.format(group_id, user_id))
             ass_info = cursor.fetchone()
-            await message.reply("@{0}, вітаю в нашій когорті, хлопче/дівчино".format(ass_info[1]))
+            await message.reply(f"@{ass_info[1]}, вітаю в нашій когорті, хлопче/дівчино")
             await message.reply(ass_main(ass_info, database, group_id))
         else:
             if int(time.time()) >= ass_info[4]:
                 await message.reply(ass_main(ass_info, database, group_id))
             else:
-                if not ass_info[6]:
-                    if ass_info[5] != 6:
-                        await message.reply(ass_main(ass_info, database, group_id))
-                    else:
+                if ass_info[6]:
+                    await message.reply("%s, дружок, ти вже награвся, шуруй звідси." % first_name)
+                else:
+                    if ass_info[5] == 6:
                         database.execute("""
                             UPDATE `{0}` SET blacklisted=1, length=0 WHERE user_id={1}
                         """.format(group_id, user_id))
                         await message.reply("%s, я тобі попку збільшую, а ти мені спамиш. Мені взагалі-то теж не солодко постійно вам попу міряти. Все, дружок, тепер ти мене не будеш зайобувати — ти в муті." % first_name)
-                else:
-                    await message.reply("%s, дружок, ти вже награвся, шуруй звідси." % first_name)
+                    else:
+                        await message.reply(ass_main(ass_info, database, group_id))
 
         database.commit()
         database.close()
@@ -212,7 +209,7 @@ async def ass(message: types.Message):
                 output_message = "ID : USERNAME : NAME\n\n"
 
                 for user_data in users_data:
-                    output_message += "{0} : {1} : {2}\n".format(user_data[0], user_data[1], user_data[2])
+                    output_message += f"{user_data[0]} :  user_data[1] : user_data[2]\n"
 
                 await message.reply(output_message)
 
@@ -220,8 +217,9 @@ async def ass(message: types.Message):
 @dp.message_handler(lambda message: message.text[:3] == "/ub")
 async def unban(message: types.Message):
     if message.from_user["id"] in config.SUPER_USERS:
-
-        if message.chat["type"] != "private":
+        if message.chat["type"] == "private":
+            await message.answer("Працює лишу у групах!")
+        else:
             if not message.text[4:]:
                 await message.reply("Ти забув уввести ID заблокованого користувача!")
             else:
@@ -234,8 +232,6 @@ async def unban(message: types.Message):
                 database.close()
 
                 await message.reply("Користувач {0} може повернутися до гри!".format(id))
-        else:
-            await message.answer("Працює лишу у групах!")
 
 
 @dp.message_handler(lambda message: message.text[:2] == "/r")
@@ -272,9 +268,7 @@ async def show_reports(message: types.Message):
 
         reports = cursor.fetchall()
 
-        if not reports:
-            await message.reply("Ще нема звітів!")
-        else:
+        if reports:
             output_message = "GROUP_ID : USER_ID : USERNAME : NAME : MESSAGE\n\n"
             for report in reports:
                 output_message += "⛔️{0} : {1} : {2} : {3}\n      {3}\n\n".format(*report)
@@ -282,6 +276,8 @@ async def show_reports(message: types.Message):
             database.close()
 
             await message.reply(output_message)
+        else:
+            await message.reply("Ще нема звітів!")
 
 
 @dp.message_handler(commands=["clear_reports"])
@@ -299,8 +295,10 @@ async def clear_reports(message: types.Message):
 
 @dp.message_handler(commands=["statistic"])
 async def statistic(message: types.Message):
-    database = sqlite3.connect("list")
-    if message.chat["type"] != "private":
+    if "private" == message.chat["type"]:
+        await message.answer("Працює лише у групах!")
+    else:
+        database = sqlite3.connect("list")
         try:
             cursor = database.execute("""
                 SELECT * FROM `{0}` ORDER BY length DESC
@@ -335,22 +333,19 @@ async def statistic(message: types.Message):
                     i += 1
 
             await message.reply(output_message)
-    else:
-        await message.answer("Працює лише у групах!")
 
 
 @dp.message_handler(commands=["leave"])
 async def leave(message: types.Message):
-    database = sqlite3.connect("list")
-
     if message.chat["type"] != "private":
+        database = sqlite3.connect("list")
+
         cursor = database.execute("""
         SELECT * FROM `{0}` WHERE user_id={1}
         """.format(message.chat["id"]*-1, message.from_user["id"]))
+
         ass_info = cursor.fetchone()
-        if not ass_info:
-            await message.reply("Ти не зарегестрований у грі!")
-        else:
+        if ass_info:
             if not ass_info[6]:
                 database.execute("""
                     DELETE FROM `{0}` WHERE user_id={1}
@@ -358,6 +353,8 @@ async def leave(message: types.Message):
                 await message.reply("Ти покинув гру! Шкода такий гарний зад.")
             else:
                 await message.reply("Ні, таке не проканає 😏")
+        else:
+            await message.reply("Ти не зарегестрований у грі!")
         database.commit()
         database.close()
     else:
