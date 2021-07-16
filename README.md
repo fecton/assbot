@@ -12,8 +12,10 @@
     <div>
         <h3><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpngimg.com%2Fuploads%2Ffolder%2Ffolder_PNG8754.png&f=1&nofb=1" width="30"> Files:</h3>
         <ul>
+            <li><b>avatar.jpg</b> — bot's avatar </li>
             <li><b>config.py</b> — file with configuration parameters (TOKEN, SUPER_USERS, DEBUG)</li>
             <li><b>main.py</b> — main file</li>
+            <li><b>messages.json</b> — file with bot's long messages (help, start, admin, about)</li>
         </ul>
     </div><hr>
     <div align=center>
@@ -39,6 +41,9 @@
     <div>
         <ul>
             <li>
+                <b>/start</b> — greet the bot
+            </li>
+            <li>
                 <b>/ass</b> — start playing
             </li>
             <li>
@@ -53,6 +58,9 @@
             <li>
                 <b>/statistic</b> — show top list of users
             </li>
+            <li>
+                <b>/about</b> — show info about the developer
+            </li>
         </ul>
     </div><hr>
     <div>
@@ -65,6 +73,12 @@
             </li>            
             <li>
                 <b>/bl {group_id}</b> — show banned users
+            </li>
+            <li>
+                <b>/ban {user_id}</b> — add user to blacklist
+            </li>
+            <li>
+                <b>/show_groups</b> — show groups id and name where bot are using
             </li>
             <li>
                 <b>/ub {user_id}</b> — unban user
