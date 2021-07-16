@@ -6,11 +6,12 @@ __version__ = '1.3'
 import sqlite3
 
 from aiogram import Bot, Dispatcher, executor, types
+from random  import randint
+from json    import loads
+from time    import time
+from os      import path
+
 from config import *
-from random import randint
-from json import loads
-from os import path
-from time import time
 
 if not TOKEN:
     print("[!] Empty token!!")
@@ -26,6 +27,9 @@ content = loads(open("messages.json", "r", encoding="utf8").read())
 
 
 class ass_info_obj():
+    '''
+    Used for better understanding ass_info
+    '''
     def __init__(self, ass_info: tuple):
         self.id          = ass_info[0]
         self.username    = ass_info[1]
@@ -140,6 +144,7 @@ def ass_main(ass_info, database, group_id):
 
 
 if not path.exists("list"):
+    # it created database if it doesn't exist + create tables
     database = sqlite3.connect("list")
     database.execute("""
         CREATE TABLE `reports` (
@@ -299,6 +304,12 @@ async def show_blacklisted_users(message: types.Message):
         elif len(group_id) < 5:
             await message.reply("Неповний ID группи!")
         else:
+            try:
+                group_id_tmp = int(group_id)
+            except ValueError:
+                await message.reply("Вибач, але не знаю такої групи.")
+                return
+
             database = sqlite3.connect("list")
             try:
                 cursor = database.execute("""
@@ -367,11 +378,10 @@ async def show_groups(message: types.Message):
 
         # table_list = [x[0] for x in cursorObj.fetchall() if x[0] not in ["reports","groups_name"]]
 
-
-
         output_message = "💁<i><b>TABLES</b></i>\n"+"="*16+"\n"
         for key in groups_dict.keys():
             output_message += str(key) + " : " + groups_dict[key] + "\n"
+
         await message.reply(output_message, parse_mode="HTML")
 
 
@@ -461,13 +471,20 @@ async def unban(message: types.Message):
         if message.chat.type == "private":
             await message.answer("Працює лишу у групах!")
         else:
-            if not message.text[4:]:
+            user_id = message.text[4:]
+            if not user_id:
                 await message.reply("Ти забув уввести ID заблокованого користувача!")
             else:
+                try:
+                    tmp = int(user_id)
+                except ValueError:
+                    await message.reply("Невірний формат!")
+                    return
+
                 database = sqlite3.connect("list")
                 database.execute("""
                     UPDATE `{0}` SET blacklisted=0, spamcount=0 WHERE user_id={1}
-                """.format(message.chat.id * -1, message.text[4:]))
+                """.format(message.chat.id * -1, user_id))
 
                 database.commit()
                 database.close()
@@ -633,6 +650,43 @@ async def leave(message: types.Message):
         database.close()
     else:  # if message was gotten from private message
         await message.answer("Працює лише у групах!")
+
+
+@dp.message_handler(lambda message: message.text[:5] == "/show")
+async def show_users(message: types.Message):
+    '''
+    This function send message with all user from group via group id
+    :group_id: Yeah, it's Group_id
+    '''
+    group_id = message.text[6:].strip(" ")
+
+    if message.from_user.id in SUPER_USERS:
+        if group_id:
+            try:
+                group_id = int(group_id)
+                database = sqlite3.connect("list")
+
+                try:
+                    USERS = database.execute(f"SELECT * FROM `{group_id}`").fetchall()
+                    output_message = "ID : USERNAME : NAME : SPAMCOUNT: IS_BANNED\n"
+                    for user in USERS:
+                        if user[6] == 1:
+                            output_message += f"{user[0]} : {user[1]} : {user[2]} : {user[5]} : True\n"
+                        else:
+                            output_message += f"{user[0]} : {user[1]} : {user[2]} : {user[5]} : False\n"
+
+                    await message.reply(output_message)
+                except sqlite3.OperationalError:
+                    await message.reply("Такої групи не існує")
+                finally:
+                    database.close()
+                    return
+
+                database.close()
+            except ValueError:
+                await message.reply("Невірний формат!")
+        else:
+            await message.reply("Ти забув про ідентифікатор групи!")
 
 
 @dp.message_handler(commands=["start"])
