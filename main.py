@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+# Open-Source AssBot 2021
+# ------------------------------
+#
+# Made with love by Fecton
+# https://github.com//fecton
+#
+# ------------------------------
+# Enjoy using! ^_^
+
 __version__ = '1.4'
 
 import sqlite3
@@ -14,10 +23,13 @@ from os      import path
 from config import *
 
 DB_NAME = "list"
+
 # initialization
 bot = Bot(TOKEN)
 dp  = Dispatcher(bot)
+
 print("[+] Bot initialization was successfully!")
+
 
 # if you want to read from json-file
 content = loads(open("messages.json", "r", encoding="utf8").read())
@@ -34,12 +46,12 @@ class ass_info_obj:
         self.length      = ass_info[3]
         self.endtime     = ass_info[4]
         self.spamcount   = ass_info[5]
-        self.blackDB_NAMEed = ass_info[6]
+        self.blacklisted = ass_info[6]
 
 
-def users_input(message, command: str) -> str:
+def user_input(message, command="": str) -> str:
     text = message.text.replace(command + " ", "").strip()
-    if command in text:
+    if command in text or command == "":
         return ""
     return text
 
@@ -54,7 +66,7 @@ def ass_main(ass_info, database, group_id) -> str:
     :return:         Send to a database an query which change data.
     '''
 
-    ass_info = ass_info_obj(ass_info)
+    # ass_info = ass_info_obj(ass_info)
 
     if ass_info.endtime > int(time()):
         last_time = ass_info.endtime - int(time())
@@ -67,10 +79,7 @@ def ass_main(ass_info, database, group_id) -> str:
         if ass_info.username == ass_info.name:
             ass_info.username = ass_info.name
         else:
-            try:
-                ass_info.username = "@" + ass_info.username
-            except TypeError:
-                ass_info.username = "Анонимус"
+            ass_info.username = "@" + ass_info.username
 
         if hours == 0:
             if minutes == 0:
@@ -95,15 +104,19 @@ def ass_main(ass_info, database, group_id) -> str:
             UPDATE `{0}` SET spamcount={1} WHERE user_id={2}
         """.format(group_id, ass_info.spamcount + 1, ass_info.id))
     else:
+
+        # TODO: Make message which will be sent when user achieve some aim
+        # For example:
+        # 200 см - "Фіга вона велечезна"
+        # 400 см - "Хай впаде на мене метеорит"
+        # etc.
+
         tmp_length = randint(-8, 15)
 
         if ass_info.username == ass_info.name:
             ass_info.username = ass_info.name
         else:
-            try:
-                ass_info.username = "@" + ass_info.username
-            except TypeError:
-                ass_info.username = "Анонимус"
+            ass_info.username = "@" + ass_info.username
 
         output_message = "{0}, твоя дупця ".format(ass_info.username)
 
@@ -167,7 +180,7 @@ if not path.exists(DB_NAME):
             group_name  VARCHAR(255) NOT NULL
         )
     """)
-    print("[+] Groups_name  table is created successfully!")
+    print("[+] Group's name table is created successfully!")
     database.commit()
     database.close()
 else:
@@ -206,7 +219,7 @@ async def ass(message: types.Message):
                     length      INTEGER                 NOT NULL,
                     endtime     INTEGER                 NOT NULL,
                     spamcount   INTEGER                 NOT NULL,
-                    blackDB_NAMEed BOOLEAN                 NOT NULL
+                    blacklisted BOOLEAN                 NOT NULL
                 );""" % group_id)
 
             print("[+] Table with name '%d' (%s) created successfully!" % (group_id, message.chat.title))
@@ -214,7 +227,11 @@ async def ass(message: types.Message):
             cursor = database.execute("""
             SELECT * FROM `{0}` WHERE user_id={1}
             """.format(group_id, user_id))
-            ass_info = ass_info_obj(cursor.fetchone())
+            
+            ass_info = cursor.fetchone()
+
+            if ass_info is not None:
+                ass_info = ass_info_obj(cursor.fetchone())
 
             try:
                 database.execute("""
@@ -239,33 +256,30 @@ async def ass(message: types.Message):
         database.commit()
 
         # if user exists in database
+        ass_info = ass_info_obj(ass_info)
 
         if ass_info is None:  # if user didn't be registered in the game
             if username is None:  # if user doesn't have username
                 username = first_name
             userinfo = (user_id, username, first_name, 0, 0, 0, 0)
             database.execute("""
-                INSERT INTO `%d`(user_id, username, name, length, endtime, spamcount, blackDB_NAMEed)
+                INSERT INTO `%d`(user_id, username, name, length, endtime, spamcount, blacklisted)
                 VALUES (?,?,?,?,?,?,?)
             """ % group_id, userinfo)
 
-            cursor = database.execute("""
-            SELECT * FROM `{0}` WHERE user_id={1}
-            """.format(group_id, user_id))
+            ass_info = ass_info_obj(userinfo)
 
-            ass_info = cursor.fetchone()
-
-            await message.reply(f"{ass_info[1]}, вітаю в нашій когорті, хлопче/дівчино! " + ass_main(ass_info, database, group_id))
+            await message.reply(f"Вітаю в нашій когорті, хлопче/дівчино!\n" + ass_main(ass_info, database, group_id))
         else:
-            if ass_info.blackDB_NAMEed:  # if already blackDB_NAMEed
+            if ass_info.blacklisted:  # if already blacklisted
                 await message.reply("%s, дружок, ти вже награвся, шуруй звідси." % first_name)
-            else:  # if not blackDB_NAMEed
+            else:  # if not blacklisted
                 if int(time()) >= ass_info.endtime:  # if last_time already pasted
                     await message.reply(ass_main(ass_info, database, group_id))
                 else:
-                    if ass_info.spamcount == 8:  # if spamcount == 8 -> blackDB_NAMEed
+                    if ass_info.spamcount == 8:  # if spamcount == 8 -> blacklisted
                         database.execute("""
-                            UPDATE `{0}` SET blackDB_NAMEed=1, length=0 WHERE user_id={1}
+                            UPDATE `{0}` SET blacklisted=1, length=0 WHERE user_id={1}
                         """.format(group_id, user_id))
                         await message.reply(
                             "%s, я тобі попку збільшую, а ти мені спамиш. Мені взагалі-то теж не солодко постійно вам попу міряти. Все, дружок, тепер ти мене не будеш зайобувати — ти в муті."
@@ -279,17 +293,13 @@ async def ass(message: types.Message):
 
 
 @dp.message_handler(commands="bl")
-async def show_blackDB_NAMEed_users(message: types.Message):
+async def show_blacklisted_users(message: types.Message):
     '''
     This function shows all banned users in a group
-    /bl :user_id:   Group ID
     '''
 
-    if message.from_user.is_bot:  # ignore bots
-        return
-
     if message.from_user.id in SUPER_USERS:  # if is admin
-        group_id = users_input(message, "/bl")
+        group_id = user_input(message, "/bl")
 
         if group_id == "":
             await message.reply("Ти забув ввести ID группи!")
@@ -303,7 +313,7 @@ async def show_blackDB_NAMEed_users(message: types.Message):
             database = sqlite3.connect(DB_NAME)
             try:
                 cursor = database.execute("""
-                    SELECT * FROM `{0}` WHERE blackDB_NAMEed=1
+                    SELECT * FROM `{0}` WHERE blacklisted=1
                 """.format(group_id))
                 users_data = cursor.fetchall()
             except sqlite3.OperationalError:
@@ -397,21 +407,17 @@ async def show_reports(message: types.Message):
 async def ban(message: types.Message):
     '''
     This header reads "/ban" string and after a space user id
-    after that updates user's column "blackDB_NAMEed" to 1 (user will be banned)
-
-    :param message.text[5:]: user id
+    after that updates user's column "blacklisted" to 1 (user will be banned)
     '''
-    if message.from_user.is_bot:  # ignore bots
-        return
 
     if message.from_user.id in SUPER_USERS:  # if is admin
         if message.chat.type != "private":
-            users_input = users_input(message, "/ban")
-            if not users_input:
+            user_input = user_input(message, "/ban")
+            if not user_input:
                 await message.reply("Можливо ти щось забув?")
             else:
                 try:
-                    user_id = int(users_input)
+                    user_id = int(user_input)
                     group_id = message.chat.id * -1
                     database = sqlite3.connect(DB_NAME)
 
@@ -423,11 +429,11 @@ async def ban(message: types.Message):
 
                     if user:
                         database.execute(f"""
-                            UPDATE `{group_id}` SET blackDB_NAMEed=1 WHERE user_id={user_id}
+                            UPDATE `{group_id}` SET blacklisted=1 WHERE user_id={user_id}
                         """)
                     else:
                         database.execute(f"""
-                            INSERT INTO `{group_id}` (user_id,username,name,length,endtime,spamcount,blackDB_NAMEed)
+                            INSERT INTO `{group_id}` (user_id,username,name,length,endtime,spamcount,blacklisted)
                             VALUES (?,?,?,?,?,?,?)
                         """, (user_id, message.from_user.username, message.from_user.first_name, 0, 0, 0, 1)
                                          )
@@ -443,16 +449,14 @@ async def ban(message: types.Message):
 @dp.message_handler(commands="ub")
 async def unban(message: types.Message):
     '''
-    This handler unban user by the argument (set blackDB_NAMEed to 0)
+    This handler unban user by the argument (set blacklisted to 0)
 
     :user_id: user's id
     '''
-    if message.from_user.is_bot:  # ignore bots
-        return
 
     if message.from_user.id in SUPER_USERS:  # if is admin
         if message.chat.type != "private":
-            user_id = users_input(message, "/ub")
+            user_id = user_input(message, "/ub")
             if not user_id:
                 await message.reply("Ти забув уввести ID заблокованого користувача!")
             else:
@@ -464,7 +468,7 @@ async def unban(message: types.Message):
 
                 database = sqlite3.connect(DB_NAME)
                 database.execute("""
-                    UPDATE `{0}` SET blackDB_NAMEed=0, spamcount=0 WHERE user_id={1}
+                    UPDATE `{0}` SET blacklisted=0, spamcount=0 WHERE user_id={1}
                 """.format(message.chat.id * -1, user_id))
 
                 database.commit()
@@ -474,6 +478,7 @@ async def unban(message: types.Message):
         else:
             await message.reply("Працює лише в групах!")
 
+
 # REPORT "message"
 @dp.message_handler(commands="r")
 async def report(message: types.Message):
@@ -482,10 +487,8 @@ async def report(message: types.Message):
 
     :param report_message
     '''
-    if message.from_user.is_bot:  # ignore bots
-        return
 
-    report_message = users_input(message, "/r")
+    report_message = user_input(message, "/r")
 
     if len(report_message) < 10:
         if len(report_message.strip()) == 0:
@@ -578,23 +581,28 @@ async def statistic(message: types.Message):
             output_message = "Рейтинг гравців:\n\n"
 
             emojis = ["👑 ", "🥇 ", "🥈 ", "🥉 ", "😈 ", "😇"]
-            i = 1
+            i = 0
             for user_data in users_data:
-                try:
-                    if user_data[6]:
+                # (2352343, 'Fecton', 'Fecton', 10, 1627884524, 3, 0)
+                user_data = ass_info_obj(user_data)
+
+                if i < 6:
+                    if user_data.blacklisted:
                         output_message += "💢"
                     else:
-                        output_message += emojis[i - 1]
-                except IndexError:
-                    pass
+                        if i == 0:
+                            output_message += "     %s Царь %s — %d см\n\n" % (emojis[i], user_data.name, user_data.length)
+                        else:
+                            output_message += emojis[i]
 
-                if user_data[6]:
-                    output_message += "{0}. {1} залишився без дупи через спам\n".format(i, user_data[2])
+                if user_data.blacklisted:
+                    output_message += "{0}. {1} залишився без дупи через спам\n".format(i, user_data.name)
                 else:
-                    if not user_data[3]:
-                        output_message += "{0}. {1} — не має сіднички\n".format(i, user_data[2], user_data[3])
+                    if not user_data.length:
+                        output_message += "{0}. {1} — не має сіднички\n".format(i, user_data.name, user_data.length)
                     else:
-                        output_message += "{0}. {1} — {2} см\n".format(i, user_data[2], user_data[3])
+                        if i != 0:
+                            output_message += "{0}. {1} — {2} см\n".format(i, user_data.name, user_data.length)
                     i += 1
 
             await message.reply(output_message)
@@ -614,9 +622,9 @@ async def leave(message: types.Message):
         ass_info = ass_info_obj(cursor.fetchone())
 
         if ass_info:  # if user isn't registered
-            if ass_info.blackDB_NAMEed:  # if user is blackDB_NAMEed
+            if ass_info.blacklisted:  # if user is blacklisted
                 await message.reply("Ні, таке не проканає 😏")
-            else:  # if user isn't blackDB_NAMEed
+            else:  # if user isn't blacklisted
                 database.execute("""
                     DELETE FROM `{0}` WHERE user_id={1}
                 """.format(message.chat.id * -1, message.from_user.id))
@@ -635,7 +643,7 @@ async def show_users(message: types.Message):
     This function send message with all user from group via group id
     :group_id: Yeah, it's Group_id
     '''
-    group_id = users_input(message, "/show")
+    group_id = user_input(message, "/show")
     
     if message.from_user.id in SUPER_USERS:
         if group_id:
@@ -647,11 +655,11 @@ async def show_users(message: types.Message):
                     USERS = database.execute(f"SELECT * FROM `{group_id}`").fetchall()
                     output_message = "ID : USERNAME : NAME : SPAMCOUNT: IS_BANNED\n"
                     for user in USERS:
-                        if user[6] == 1: # if blackDB_NAMEed
-                            blackDB_NAMEed = "True"
+                        if user[6] == 1: # if blacklisted
+                            blacklisted = "True"
                         else:
-                            blackDB_NAMEed = "False"
-                        output_message += f"{user[0]} : {user[1]} : {user[2]} : {user[5]} : {blackDB_NAMEed}\n"
+                            blacklisted = "False"
+                        output_message += f"{user[0]} : {user[1]} : {user[2]} : {user[5]} : {blacklisted}\n"
 
                     await message.reply(output_message)
                 except sqlite3.OperationalError:
