@@ -75,17 +75,20 @@
                 <b>/bl group_id</b> — show banned users
             </li>
             <li>
-                <b>/ban user_id</b> — add user to blacklist
+                <b>/ban group_id user_id</b> — add user to blacklist
             </li>
             <li>
                 <b>/groups</b> — show groups id and name where bot are using
             </li>
             <li>
-                <b>/ub user_id</b> — unban user
+                <b>/ub group_id user_id</b> — unban user
             </li>
             <li>
                 <b>/reports</b> — show all reports from table `reports`
             </li>
+            <li>
+                <b>/dreports</b> — show all reports from table `reports` (detailed form)
+            </li>            
             <li>
                 <b>/clear</b> — delete all rows in table `reports`
             </li>
