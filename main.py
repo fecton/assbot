@@ -49,7 +49,7 @@ class ass_info_obj:
         self.blacklisted = ass_info[6]
 
 
-def user_input(message, command="": str) -> str:
+def user_input(message, command="") -> str:
     text = message.text.replace(command + " ", "").strip()
     if command in text or command == "":
         return ""
@@ -76,15 +76,13 @@ def ass_main(ass_info, database, group_id) -> str:
 
         minutes = int(last_time / 60)
 
-        if ass_info.username == ass_info.name:
-            ass_info.username = ass_info.name
-        else:
-            ass_info.username = "@" + ass_info.username
+        if ass_info.username == ass_info.name: ass_info.username = ass_info.name
+        else:                                  ass_info.username = "@" + ass_info.username
 
         if hours == 0:
             if minutes == 0:
                 output_message = (
-                    "{0}, готуйсь заглянути залишилося менше хвилини".format(ass_info.username, minutes)
+                    "{0}, готую вимірювальні пристрої, зачекай хвильку".format(ass_info.username, minutes)
                 )
             else:
                 output_message = (
@@ -256,12 +254,12 @@ async def ass(message: types.Message):
         database.commit()
 
         # if user exists in database
-        ass_info = ass_info_obj(ass_info)
 
         if ass_info is None:  # if user didn't be registered in the game
             if username is None:  # if user doesn't have username
                 username = first_name
             userinfo = (user_id, username, first_name, 0, 0, 0, 0)
+
             database.execute("""
                 INSERT INTO `%d`(user_id, username, name, length, endtime, spamcount, blacklisted)
                 VALUES (?,?,?,?,?,?,?)
@@ -269,22 +267,20 @@ async def ass(message: types.Message):
 
             ass_info = ass_info_obj(userinfo)
 
-            await message.reply(f"Вітаю в нашій когорті, хлопче/дівчино!\n" + ass_main(ass_info, database, group_id))
+            await message.reply(f"👋 Вітаю в нашій когорті, хлопче/дівчино!\n" + ass_main(ass_info, database, group_id))
         else:
+            ass_info = ass_info_obj(ass_info)
             if ass_info.blacklisted:  # if already blacklisted
                 await message.reply("%s, дружок, ти вже награвся, шуруй звідси." % first_name)
             else:  # if not blacklisted
                 if int(time()) >= ass_info.endtime:  # if last_time already pasted
                     await message.reply(ass_main(ass_info, database, group_id))
                 else:
-                    if ass_info.spamcount == 8:  # if spamcount == 8 -> blacklisted
+                    if ass_info.spamcount == 5:  # if spamcount == 5 -> blacklisted
                         database.execute("""
                             UPDATE `{0}` SET blacklisted=1, length=0 WHERE user_id={1}
                         """.format(group_id, user_id))
-                        await message.reply(
-                            "%s, я тобі попку збільшую, а ти мені спамиш. Мені взагалі-то теж не солодко постійно вам попу міряти. Все, дружок, тепер ти мене не будеш зайобувати — ти в муті."
-                            % first_name
-                        )
+                        await message.reply( first_name + content["spam"] )
                     else:
                         await message.reply(ass_main(ass_info, database, group_id))
 
@@ -307,7 +303,7 @@ async def show_blacklisted_users(message: types.Message):
             try:
                 group_id_tmp = int(group_id)
             except ValueError:
-                await message.reply("Вибач, але не знаю такої групи.")
+                await message.reply("⛔️ Вибач, але не знаю такої групи.")
                 return
 
             database = sqlite3.connect(DB_NAME)
@@ -317,7 +313,7 @@ async def show_blacklisted_users(message: types.Message):
                 """.format(group_id))
                 users_data = cursor.fetchall()
             except sqlite3.OperationalError:
-                await message.reply("Вибач, але не знаю такої групи.")
+                await message.reply("⛔️ Вибач, але не знаю такої групи.")
                 database.close()
                 return
             finally:
@@ -442,9 +438,9 @@ async def ban(message: types.Message):
                     database.close()
                     await message.answer("Користувач отримав по своїй сідничці!")
                 except ValueError:
-                    await message.reply("Не знаю таких гравців.")
+                    await message.reply("⛔️Не знаю таких гравців.")
         else:
-            await message.reply("Працює лишу в групах!")
+            await message.reply("⛔️ Працює лишу в групах!")
 
 @dp.message_handler(commands="ub")
 async def unban(message: types.Message):
@@ -458,12 +454,12 @@ async def unban(message: types.Message):
         if message.chat.type != "private":
             user_id = user_input(message, "/ub")
             if not user_id:
-                await message.reply("Ти забув уввести ID заблокованого користувача!")
+                await message.reply("⛔️ Ти забув уввести ID заблокованого користувача!")
             else:
                 try:
                     tmp = int(user_id)
                 except ValueError:
-                    await message.reply("Невірний формат!")
+                    await message.reply("⛔️Невірний формат!")
                     return
 
                 database = sqlite3.connect(DB_NAME)
@@ -476,7 +472,7 @@ async def unban(message: types.Message):
 
                 await message.reply("Користувач може повернутися до гри!")
         else:
-            await message.reply("Працює лише в групах!")
+            await message.reply("⛔️ Працює лише в групах!")
 
 
 # REPORT "message"
@@ -492,22 +488,28 @@ async def report(message: types.Message):
 
     if len(report_message) < 10:
         if len(report_message.strip()) == 0:
-            await message.reply("Ти забув уввести свій звіт!")
+            await message.reply("⛔️ Ти забув уввести свій звіт!")
         else:
-            await message.reply("Звіт дуже малий!")
+            await message.reply("⛔️ Звіт дуже малий!")
     elif message.text[2] == "@":
-        await message.reply("Невірний формат!")
+        await message.reply("⛔️ Невірний формат!")
     elif "--" in message.text or "#" in message.text:
-        await message.reply("Невірний формат!")
+        await message.reply("⛔️ Невірний формат!")
     else:
 
         data = [message.chat.id * -1, message.chat.title,
                 message.from_user.id, message.from_user.username,
                 message.from_user.first_name, report_message]
 
+        if data[0] < 0:
+            data[0] *= -1 
+
         # if it's personal message then message.chat will be marked "Personal message"
+
         if data[1] is None:
             data[1] = "Личные сообщения"
+        if data[3] is None:
+            data[3] = "N/A"
 
         database = sqlite3.connect(DB_NAME)
         try:
@@ -534,6 +536,7 @@ async def report(message: types.Message):
         database.commit()
         database.close()
         await message.reply("Дякуємо за звіт! 💛")
+
         print("[R] A report had sent!")
 
 
@@ -582,8 +585,9 @@ async def statistic(message: types.Message):
 
             emojis = ["👑 ", "🥇 ", "🥈 ", "🥉 ", "😈 ", "😇"]
             i = 0
+
             for user_data in users_data:
-                # (2352343, 'Fecton', 'Fecton', 10, 1627884524, 3, 0)
+                # (user_id, username, fisrtname, length, endtime, spamcount, blacklisted)
                 user_data = ass_info_obj(user_data)
 
                 if i < 6:
@@ -591,15 +595,19 @@ async def statistic(message: types.Message):
                         output_message += "💢"
                     else:
                         if i == 0:
-                            output_message += "     %s Царь %s — %d см\n\n" % (emojis[i], user_data.name, user_data.length)
+                            if user_data.length == 0:
+                                output_message += "     %s Безжопий царь %s\n\n" % (emojis[i], user_data.name)
+                            else:
+                                output_message += "     %s Царь %s — %d см\n\n" % (emojis[i], user_data.name, user_data.length)
                         else:
                             output_message += emojis[i]
 
                 if user_data.blacklisted:
-                    output_message += "{0}. {1} залишився без дупи через спам\n".format(i, user_data.name)
+                    output_message += "{1} залишився без дупи через спам\n".format(i, user_data.name)
                 else:
                     if not user_data.length:
-                        output_message += "{0}. {1} — не має сіднички\n".format(i, user_data.name, user_data.length)
+                        if i != 0:
+                            output_message += "{0}. {1} — не має сіднички\n".format(i, user_data.name, user_data.length)
                     else:
                         if i != 0:
                             output_message += "{0}. {1} — {2} см\n".format(i, user_data.name, user_data.length)
@@ -623,18 +631,18 @@ async def leave(message: types.Message):
 
         if ass_info:  # if user isn't registered
             if ass_info.blacklisted:  # if user is blacklisted
-                await message.reply("Ні, таке не проканає 😏")
+                await message.reply("Ні, дружок, таке не проканає 😏")
             else:  # if user isn't blacklisted
                 database.execute("""
                     DELETE FROM `{0}` WHERE user_id={1}
                 """.format(message.chat.id * -1, message.from_user.id))
                 await message.reply("Ти покинув гру! Шкода такий гарний зад.")
         else:  # if user isn't registered
-            await message.reply("Ти не зарегестрований у грі!")
+            await message.reply("⛔️ Ти не зарегестрований у грі!")
         database.commit()
         database.close()
     else:  # if message was gotten from private message
-        await message.answer("Працює лише у групах!")
+        await message.answer("⛔️ Працює лише у групах!")
 
 
 @dp.message_handler(commands="show")
@@ -663,15 +671,14 @@ async def show_users(message: types.Message):
 
                     await message.reply(output_message)
                 except sqlite3.OperationalError:
-                    await message.reply("Такої групи не існує")
+                    await message.reply("⛔️ Такої групи не існує")
                 finally:
                     database.close()
-                    return
 
             except ValueError:
-                await message.reply("Невірний формат!")
+                await message.reply("⛔️ Невірний формат!")
         else:
-            await message.reply("Ти забув про ідентифікатор групи!")
+            await message.reply("⛔️ Ти забув про ідентифікатор групи!")
 
 
 @dp.message_handler(commands="start")
