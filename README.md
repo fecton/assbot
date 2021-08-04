@@ -47,13 +47,16 @@
                 <b>/ass</b> — start playing
             </li>
             <li>
+                <b>/luck</b> — try your luck :)
+            </li>
+            <li>
                 <b>/help</b> — show help message
             </li>
             <li>
                 <b>/leave</b> — leave game and delete user's data
             </li>
             <li>
-                <b>/r {text}</b> — send report to `reports` table
+                <b>/r text</b> — send report to `reports` table
             </li>
             <li>
                 <b>/statistic</b> — show top list of users
@@ -69,25 +72,28 @@
     <div>
         <ul>
             <li>
-                <b>/admin_help</b> — show admin commands
+                <b>/admin</b> — show admin commands
             </li>            
             <li>
-                <b>/bl {group_id}</b> — show banned users
+                <b>/bl group_id</b> — show banned users
             </li>
             <li>
-                <b>/ban {user_id}</b> — add user to blacklist
+                <b>/ban group_id user_id</b> — add user to blacklist
             </li>
             <li>
-                <b>/show_groups</b> — show groups id and name where bot are using
+                <b>/groups</b> — show groups id and name where bot are using
             </li>
             <li>
-                <b>/ub {user_id}</b> — unban user
+                <b>/ub group_id user_id</b> — unban user
             </li>
             <li>
-                <b>/show_reports</b> — show all reports from table `reports`
+                <b>/reports</b> — show all reports from table `reports`
             </li>
             <li>
-                <b>/clear_reports</b> — delete all rows in table `reports`
+                <b>/dreports</b> — show all reports from table `reports` (detailed form)
+            </li>            
+            <li>
+                <b>/clear</b> — delete all rows in table `reports`
             </li>
         </ul>
     </div>

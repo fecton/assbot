@@ -1,4 +1,4 @@
 # here is your token
-TOKEN = "1725460277:AAHqsCOJbd_OglFT-t1dWqGs7KxzXzECiV8"
+TOKEN = ""
 # here are admins' id (integer)
 SUPER_USERS = []
