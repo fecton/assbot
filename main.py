@@ -15,9 +15,10 @@ __version__ = '1.4'
 import sqlite3
 
 from aiogram import Bot, Dispatcher, executor, types
-from random  import randint
+from random  import randint, choice
 from json    import loads
 from time    import time
+from math    import ceil
 from os      import path
 
 from config import *
@@ -40,13 +41,14 @@ class ass_info_obj:
     Used for better understanding ass_info
     '''
     def __init__(self, ass_info: tuple):
-        self.id          = ass_info[0]
-        self.username    = ass_info[1]
-        self.name        = ass_info[2]
-        self.length      = ass_info[3]
-        self.endtime     = ass_info[4]
-        self.spamcount   = ass_info[5]
-        self.blacklisted = ass_info[6]
+        self.id            = ass_info[0]
+        self.username      = ass_info[1]
+        self.name          = ass_info[2]
+        self.length        = ass_info[3]
+        self.endtime       = ass_info[4]
+        self.spamcount     = ass_info[5]
+        self.blacklisted   = ass_info[6]
+        self.luck_timeleft = ass_info[7]
 
 
 def user_input(message: types.Message, command: str) -> str:
@@ -180,16 +182,6 @@ if not path.exists(DB_NAME):
     """)
     print("[+] Group's name table was created successfully!")
 
-
-    db.execute("""
-        CREATE TABLE `trymyluck` (
-            user_id  INTEGER NOT NULL,
-            timeleft INTEGER NOT NULL
-        ) 
-    """)
-    print("[+] Table 'trymyluck' was created successfully!")
-
-
     db.commit()
     db.close()
 
@@ -223,13 +215,14 @@ async def ass(message: types.Message):
 
             db.execute("""
             CREATE TABLE `%d`(
-                    user_id     INTEGER     PRIMARY KEY NOT NULL,
-                    username    VARCHAR(35)             NOT NULL,
-                    name        VARCHAR(255)            NOT NULL,
-                    length      INTEGER                 NOT NULL,
-                    endtime     INTEGER                 NOT NULL,
-                    spamcount   INTEGER                 NOT NULL,
-                    blacklisted BOOLEAN                 NOT NULL
+                    user_id       INTEGER     PRIMARY KEY NOT NULL,
+                    username      VARCHAR(35)             NOT NULL,
+                    name          VARCHAR(255)            NOT NULL,
+                    length        INTEGER                 NOT NULL,
+                    endtime       INTEGER                 NOT NULL,
+                    spamcount     INTEGER                 NOT NULL,
+                    blacklisted   BOOLEAN                 NOT NULL,
+                    luck_timeleft INTEGER                 NOT NULL
                 );""" % group_id)
 
             print("[+] Table with name '%d' (%s) created successfully!" % (group_id, message.chat.title))
@@ -270,11 +263,11 @@ async def ass(message: types.Message):
         if ass_info is None:  # if user didn't be registered in the game
             if username is None:  # if user doesn't have username
                 username = first_name
-            userinfo = (user_id, username, first_name, 0, 0, 0, 0)
+            userinfo = (user_id, username, first_name, 0, 0, 0, 0, 0)
 
             db.execute("""
-                INSERT INTO `%d`(user_id, username, name, length, endtime, spamcount, blacklisted)
-                VALUES (?,?,?,?,?,?,?)
+                INSERT INTO `%d`(user_id, username, name, length, endtime, spamcount, blacklisted, luck_timeleft)
+                VALUES (?,?,?,?,?,?,?,?)
             """ % group_id, userinfo)
 
             ass_info = ass_info_obj(userinfo)
@@ -283,7 +276,7 @@ async def ass(message: types.Message):
         else:
             ass_info = ass_info_obj(ass_info)
             if ass_info.blacklisted:  # if already blacklisted
-                await message.reply("%s, дружок, ти вже награвся, шуруй звідси." % first_name)
+                await message.reply("💢 %s, дружок, ти вже награвся, шуруй звідси." % first_name)
             else:  # if not blacklisted
                 if int(time()) >= ass_info.endtime:  # if last_time already pasted
                     await message.reply(ass_main(ass_info, db, group_id))
@@ -307,7 +300,7 @@ async def is_lucky(message: types.Message):
     '''
 
     if message.chat.type == "private":
-        await message.answer("Працює лишу у группах!")
+        await message.answer("⛔️ Працює лишу у группах!")
         return
 
     db = sqlite3.connect(DB_NAME)
@@ -318,68 +311,54 @@ async def is_lucky(message: types.Message):
     firstname = message.from_user.first_name 
 
     try:
-        user_data = db.execute("SELECT * FROM `trymyluck` WHERE user_id=%s" % message.from_user.id).fetchone()
-        ass_info = ass_info_obj(db.execute("SELECT * FROM `%d` WHERE user_id=%d" % (group_id, user_id)).fetchone())
-        
-        user_id  = user_data[0]
-        timeleft = user_data[1]
-
-        # 'True: #' - to disable it
-        if timeleft < time():
-            rate = ass_info.length * 0.85
-
-            winrate  = 10
-            result = randint(1,100)
-            
-            if result <= winrate:
-                ass_info.length *= 2
-                db.execute(f"UPDATE `{group_id}` SET length={ass_info.length} WHERE user_id={user_id}")
-                await message.answer("📈 Мені обікрали, що капець, забирай приз: %d см.\nПродовжуй грати через неділю!" % ass_info.length)
-            else:
-                ass_info.length -= ass_info.length * 0.6
-                db.execute(f"UPDATE `{group_id}` SET length={ass_info.length} WHERE user_id={user_id}")
-                await message.answer("📉 Чік -%d см, сьогодні не твій день :)\nПродовжуй грати через неділю!" % ass_info.length)
-
-            timeleft  = int(time()) + 604800 # +week
-            db.execute("UPDATE `trymyluck` SET timeleft=%d WHERE user_id=%d" % (timeleft, user_id))
-            db.commit()
-        else:
-            await message.reply("Неділя ще не пройшла!")
-            db.close()
-            return
-
+        db.execute("SELECT * FROM `%d`" % group_id)
     except sqlite3.OperationalError:
-        # User doesn't exist in the table created new one
+        await message.reply("⛔️ Ти не зарегестрований у грі: пиши /ass")
+        db.close()
+        return
 
-        ass_info = ass_info_obj(db.execute("SELECT * FROM `%d` WHERE user_id=%d" % (group_id, user_id)).fetchone())
+    #try:
+    inf = db.execute("SELECT luck_timeleft, length, spamcount FROM `%d` WHERE user_id=%d" % (group_id, user_id)).fetchone()
+
+    if inf is None:
+        await message.reply("⛔️ Ти не зарегестрований у грі: пиши /ass")
+        db.close()
+        return
+    else:
+        luck_timeleft, length, spamcount = inf
+
+    if length < 100:
+        await message.reply("⛔️ Твоя сідничка дуже мала (мін. 100 см)!")
+        return
+
+    if luck_timeleft < time():
+        winrate  = 10
         
-        # 'False: #' - to disable it
-        if ass_info.length < 100:
-            await message.reply("Вибач, але твоє тім'ячко ще дуже мале")
-            db.close()
-            return
+        if winrate >= randint(1,100):
+            good_emojis = ["😡", "🤬", "🤯", "😱", "😨", "😵", "👺", "😥", "😰", "😣", "😖", "😫", "😤", "😠", "🥺"]
+            await message.answer("📈 Мені обікрали!\n%s Забирай свої сантиметри: %d см.\nЗараз у тебе: %d см.\nПродовжуй грати через неділю!" % (choice(good_emojis), length, length*2))
+            length *= 2
         else:
-            await message.answer("Ви можете виграти 200% від вашої сідники із шансом 10% та програти 60% сіднички, граємо!")
-            rate = ass_info.length * 0.85
+            bad_emojis = ["😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "☺️", "😊", "🙂", "🙃", "😉", "😛", "😋", "😚", "🤩", "🥳", "😏"]
+            await message.answer("📉 Чік -%d см.\n%s Сьогодні явно не твій день :)\nЗараз у тебе: %d см.\nПродовжуй грати через неділю!" % (length, choice(bad_emojis), length -  length * 0.6))
+            length -= length * 0.6
 
-            winrate  = 10 # %
-            result = randint(1,100)
-            
-            if result <= winrate:
-                ass_info.length *= 2
-                db.execute(f"UPDATE `{group_id}` SET length={ass_info.length} WHERE user_id={user_id}")
-                await message.answer("📈 Мені обікрали, що капець, забирай приз: %d см.\nПродовжуй грати через неділю!" % ass_info.length)
-            else:
-                ass_info.length -= int(ass_info.length * 0.6)
-                db.execute(f"UPDATE `{group_id}` SET length={ass_info.length} WHERE user_id={user_id}")
-                await message.answer("📉 Чік -%d см, сьогодні не твій день :)\nПродовжуй грати через неділю!" % ass_info.length)
+        db.execute("UPDATE `%d` SET length=%d WHERE user_id=%d" % (group_id, length, user_id))
 
-            timeleft  = int(time()) + 604800 # +week
-            db.execute("INSERT INTO `trymyluck` (user_id, timeleft) VALUES (?,?)", (user_id, timeleft))
-        
+        luck_timeleft  = int(time()) + 604800 # +week
+        db.execute("UPDATE `%d` SET luck_timeleft=%d WHERE user_id=%d" % (group_id, luck_timeleft, user_id))
         db.commit()
-    db.close()
+    else:
+        days_left = ceil(int(luck_timeleft - time()) / 86400)
 
+        if days_left == 1:  
+            await message.reply("⛔️ Завтра ми відкриємо для тебе наші двері!")
+        else:
+            await message.reply("⛔️ Неділя ще не пройшла! Залишилося %d д." % days_left)
+        spamcount += 1
+        db.execute("UPDATE `%d` SET spamcount=%d WHERE user_id=%d" % (group_id, spamcount, user_id))
+
+    db.close()
 
 @dp.message_handler(commands="bl")
 async def show_blacklisted_users(message: types.Message):
@@ -393,11 +372,14 @@ async def show_blacklisted_users(message: types.Message):
         if group_id == "":
             await message.reply("⛔️ Ти забув ввести ID группи!")
         else:
-            try:
-                group_id_tmp = int(group_id)
-            except ValueError:
-                await message.reply("⛔️ Вибач, але не знаю такої групи.")
-                return
+            if group_id == "self":
+                group_id = message.chat.id*-1
+            else:
+                try:
+                    group_id_tmp = int(group_id)
+                except ValueError:
+                    await message.reply("⛔️ Вибач, але не знаю такої групи.")
+                    return
 
             db = sqlite3.connect(DB_NAME)
             try:
@@ -413,18 +395,23 @@ async def show_blacklisted_users(message: types.Message):
                 db.close()
 
             if not users_data:
-                await message.reply("Нема заблокованих користувачів!")
+                await message.reply("✅ Нема заблокованих користувачів!")
             else:
-                output_message  = f"👥 Group: {group_id}\n"
+                output_message  = f"👥 Group: <code>{group_id}</code>\n"
                 output_message += "ID : USERNAME : NAME\n\n"
 
+                users_count = 0
                 for user_data in users_data:
+                    users_count += 1
                     if user_data[1] == user_data[2]:
                         output_message += f"💢 {user_data[0]} :  {user_data[1]}\n"
                     else:
                         output_message += f"💢 {user_data[0]} :  @{user_data[1]} : {user_data[2]}\n"
-
-                await message.reply(output_message)
+                if users_count == 1:
+                    output_message += "\n📌 Totally: 1 user"
+                else:
+                    output_message += "\n📌 Totally: %d users" % users_count
+                await message.reply(output_message, parse_mode="HTML")
 
 
 @dp.message_handler(commands="groups")
@@ -463,11 +450,11 @@ async def show_groups(message: types.Message):
         for group in groups_info:
             groups_dict[group[0]] = group[1]
 
-        output_message = "✅ <i><b>TABLES</b></i>\n"+"="*16+"\n"
+        output_message = "✅ __*TABLES*__\n"+"="*16+"\n"
         for key in groups_dict.keys():
-            output_message += str(key) + " : " + groups_dict[key] + "\n"
+            output_message += "`%s`" % str(key) + " : " + groups_dict[key] + "\n"
 
-        await message.reply(output_message, parse_mode="HTML")
+        await message.reply(output_message, parse_mode="Markdown")
 
 
 # SHOW REPORTS FROM TABLE `reports` in simple form
@@ -528,8 +515,20 @@ async def ban(message: types.Message):
         if len(info) != 2:
             await message.reply("⛔️ Невірний формат!")
             return
-        ban_group   = int(info[0])
-        user_to_ban = int(info[1])
+        
+        # select current group
+        if info[0] == "self":
+            ban_group = message.chat.id*-1
+        else:
+            ban_group   = int(info[0])
+
+        # select yourself
+        if info[1] == "self":
+            user_to_ban = message.from_user.id
+        else:
+            user_to_ban = int(info[1])
+
+        
         if not user_to_ban:
             await message.reply("⛔️ Можливо ти щось забув?")
         else:
@@ -583,17 +582,28 @@ async def unban(message: types.Message):
             await message.reply("⛔️ Невірний формат!")
             return
 
-        group_id= info[0]
-        user_id = info[1]
+                # select current group
+        if info[0] == "self":
+            group_id = message.chat.id*-1
+        else:
+            group_id   = info[0]
+
+        # select yourself
+        if info[1] == "self":
+            user_id = message.from_user.id
+        else:
+            user_id = info[1]
+
         if not user_id:
             await message.reply("⛔️ Ти забув уввести ID заблокованого користувача!")
         else:
-            try:
-                t1,t2 = int(user_id), int(group_id)
-            except ValueError:
-                await message.reply("⛔️ Невірний формат!")
-                db.close()
-                return
+            if user_id != "self" or group_id != "self":
+                try:
+                    t1,t2 = int(user_id), int(group_id)
+                except ValueError:
+                    await message.reply("⛔️ Невірний формат!")
+                    db.close()
+                    return
 
             db = sqlite3.connect(DB_NAME)
             db.execute("""
@@ -719,7 +729,7 @@ async def statistic(message: types.Message):
         if not users_data:
             await message.reply("⛔️ Нема гравців! Стань першим!")
         else:
-            output_message = "Рейтинг гравців:\n\n"
+            output_message = "📊 Рейтинг гравців:\n\n"
 
             emojis = ["👑 ", "🥇 ", "🥈 ", "🥉 ", "😈 ", "😇"]
             i = 0
@@ -774,7 +784,7 @@ async def leave(message: types.Message):
                 db.execute("""
                     DELETE FROM `{0}` WHERE user_id={1}
                 """.format(message.chat.id * -1, message.from_user.id))
-                await message.reply("Ти покинув гру! Шкода такий гарний зад.")
+                await message.reply("✅ Ти покинув гру! Шкода такий гарний зад.")
         else:  # if user isn't registered
             await message.reply("⛔️ Ти не зарегестрований у грі!")
         db.commit()
@@ -790,33 +800,36 @@ async def show_users(message: types.Message):
     :group_id: Yeah, it's Group_id
     '''
     group_id = user_input(message, "/show")
-    
+
     if message.from_user.id in SUPER_USERS:
+        if group_id == "self":
+            group_id = message.chat.id*-1
         if group_id:
             try:
                 group_id = int(group_id)
                 db = sqlite3.connect(DB_NAME)
                 # (user_id, username, firstname, length, endtime, spamcount, blacklisted)
                 try:
-                    USERS = db.execute(f"SELECT * FROM `{group_id}`").fetchall()
-                    output_message  = f"     👥 Group: {group_id}\n"
-                    output_message += "ID : USERNAME : NAME : SPAMCOUNT: IS_BANNED\n\n"
+                    USERS = db.execute("SELECT * FROM `%d`" % group_id).fetchall()
+                    output_message  = "👥 Group: <code>%s</code>\n" % group_id
+                    output_message += "ID : USERNAME:NAME : SPAMCOUNT: IS_BANNED\n\n"
+
                     user_count = 0
                     for user in USERS:
                         user_count += 1
                         user = ass_info_obj(user)
                         if user.blacklisted == 1: # if blacklisted
-                            blacklisted = "True"
+                            blacklisted = "✅"
                         else:
-                            blacklisted = "False"
-                        output_message += f"{user.id} : {user.username} : {user.name} : {user.spamcount} : {blacklisted}\n"
+                            blacklisted = "❌"
+                        output_message += f"▶️ <code>{user.id}</code> : <b>{user.username}</b> : <b>{user.name}</b> : {user.spamcount} : {blacklisted}\n"
                     
                     if user_count == 1:
                         output_message += "\n📌 Totally: 1 user"                    
                     else:
                         output_message += f"\n📌 Totally: {user_count} users"
 
-                    await message.reply(output_message)
+                    await message.reply(output_message, parse_mode="HTML")
                 except sqlite3.OperationalError:
                     await message.reply("⛔️ Такої групи не існує")
                 finally:
