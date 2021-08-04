@@ -47,6 +47,9 @@
                 <b>/ass</b> — start playing
             </li>
             <li>
+                <b>/luck</b> — try your luck :)
+            </li>
+            <li>
                 <b>/help</b> — show help message
             </li>
             <li>
