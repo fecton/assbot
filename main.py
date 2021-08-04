@@ -336,7 +336,7 @@ async def is_lucky(message: types.Message):
         
         if winrate >= randint(1,100):
             good_emojis = ["😡", "🤬", "🤯", "😱", "😨", "😵", "👺", "😥", "😰", "😣", "😖", "😫", "😤", "😠", "🥺"]
-            await message.answer("📈 Мені обікрали!\n%s Забирай свої сантиметри: %d см.\nЗараз у тебе: %d см.\nПродовжуй грати через неділю!" % (choice(good_emojis), length, length*2))
+            await message.answer("📈 Мене обікрали!\n%s Забирай свої сантиметри: %d см.\nЗараз у тебе: %d см.\nПродовжуй грати через неділю!" % (choice(good_emojis), length, length*2))
             length *= 2
         else:
             bad_emojis = ["😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "☺️", "😊", "🙂", "🙃", "😉", "😛", "😋", "😚", "🤩", "🥳", "😏"]
