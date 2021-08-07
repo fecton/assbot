@@ -1,5 +1,5 @@
 <div align=center>
-    <img src="avatar.jpg" width="100">
+    <img src="data/avatar.jpg" width="100">
     <h1>AssBot (open-source Ebobot)</h1>
 </div>
 
@@ -47,7 +47,7 @@
                 <b>/ass</b> — start playing
             </li>
             <li>
-                <b>/luck</b> — try your luck :)
+                <b>/luck</b> — try your luck
             </li>
             <li>
                 <b>/help</b> — show help message
