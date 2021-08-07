@@ -48,7 +48,7 @@ def ass_main(message: types.Message, ass_info: [list, tuple], db, group_id: int)
         minutes = int(last_time / 60)
 
         # if user doesn't have username we set to username firstname
-        if message.from_user.username == message.from_user.first_name:
+        if message.from_user.username is None:
             ass_info.username = message.from_user.first_name
         else:
             ass_info.username = "@" + message.from_user.username
@@ -88,7 +88,7 @@ def ass_main(message: types.Message, ass_info: [list, tuple], db, group_id: int)
 
         tmp_length = randint(-8, 15)
 
-        if message.from_user.username == message.from_user.first_name:
+        if message.from_user.username is None:
             ass_info.username = message.from_user.first_name
         else:
             ass_info.username = "@" + message.from_user.username
