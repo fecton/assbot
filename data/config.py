@@ -8,5 +8,5 @@ DB_NAME = "list"  # Database name
 
 TOKEN = getenv("TOKEN")  # Get token
 SUPER_USERS = [
-    817810926,
+    
 ]  # админы
