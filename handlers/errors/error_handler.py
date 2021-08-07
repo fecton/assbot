@@ -5,11 +5,7 @@ async def errors_handler(update, exception):
 	from aiogram.utils.exceptions import (Unauthorized, InvalidQueryID, TelegramAPIError,
 										CantDemoteChatCreator, MessageNotModified, MessageToDeleteNotFound,
 										MessageTextIsEmpty, RetryAfter,
-										CantParseEntities, MessageCantBeDeleted, BadRequest, NetworkError)
-
-	if isinstance(exception, NetworkError):
-		print("Network Error! Check your Internet connection!")
-		return
+										CantParseEntities, MessageCantBeDeleted, BadRequest)
 
 	if isinstance(exception, CantDemoteChatCreator):
 		print("Can't demote chat creator")
