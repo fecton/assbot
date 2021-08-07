@@ -23,11 +23,18 @@ async def ass(message: types.Message):
     first_name = message.from_user.first_name
 
     db = sqlite3.connect(DB_NAME)
-
-    cursor = db.execute("""
-    SELECT * FROM `{0}` WHERE user_id={1}
-    """.format(group_id, user_id))
-
+    try:
+        cursor = db.execute("""
+        SELECT * FROM `{0}` WHERE user_id={1}
+        """.format(group_id, user_id))
+    except sqlite3.OperationalError:
+        from database.create import CREATE_table_groups
+        db.execute(CREATE_table_groups % group_id)
+        db.commit()
+        cursor = db.execute("""
+        SELECT * FROM `{0}` WHERE user_id={1}
+        """.format(group_id, user_id))
+            
     ass_info = cursor.fetchone()
 
     # if user exists in database
