@@ -310,8 +310,8 @@ async def show_users(message: types.Message):
                             blacklisted = "✅"
                         else:
                             blacklisted = "❌"
-                        output_message += f"▶️ <code>{user.id}</code> : <b>{user.username}</b> : <b>{user.name}</b>"\
-                                          f" : {user.spamcount} : {blacklisted}\n "
+                        output_message += f" ▶️ <code>{user.id}</code> : <b>{user.username}</b> : <b>{user.name}</b>"\
+                                          f" : {user.spamcount} : {blacklisted}\n"
 
                     if user_count == 1:
                         output_message += "\n📌 Totally: 1 user"
