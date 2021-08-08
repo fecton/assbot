@@ -2,7 +2,7 @@ import sqlite3
 from aiogram import types
 from loader import dp
 from data.config import DB_NAME, long_messages
-from data.functions import ass_info_obj, ass_main
+from data.functions import Ass_Info_Obj, ass_main
 
 
 @dp.message_handler(commands="ass")
@@ -183,7 +183,7 @@ async def leave(message: types.Message):
     SELECT * FROM `{0}` WHERE user_id={1}
     """.format(message.chat.id, message.from_user.id))
 
-    ass_info = ass_info_obj(cursor.fetchone())
+    ass_info = Ass_Info_Obj(cursor.fetchone())
 
     if ass_info:  # if user isn't registered
         if ass_info.blacklisted:  # if user is blacklisted
@@ -235,7 +235,7 @@ async def statistic(message: types.Message):
             # user_data = list(user_data)
 
             # (user_id, username, fisrtname, length, endtime, spamcount, blacklisted)
-            user_data = ass_info_obj(user_data)
+            user_data = Ass_Info_Obj(user_data)
             
             if user_data.blacklisted:
                 output_message += "💢 {1} залишився без дупи через спам\n".format(i, user_data.name)

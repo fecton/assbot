@@ -1,7 +1,7 @@
 from aiogram import types
 
 
-class ass_info_obj:
+class Ass_Info_Obj:
     """
     Used for better understanding ass_info
     """
@@ -35,7 +35,7 @@ def ass_main(message: types.Message, ass_info: [list, tuple], db, group_id: int)
     :return:         Send to a database an query which change data.
     """
 
-    ass_info = ass_info_obj(ass_info)
+    ass_info = Ass_Info_Obj(ass_info)
 
     from time import time
 

@@ -3,7 +3,7 @@ from aiogram import types
 from loader import dp
 
 from data.config import long_messages, SUPER_USERS, DB_NAME
-from data.functions import user_input, ass_info_obj
+from data.functions import user_input, Ass_Info_Obj
 
 
 @dp.message_handler(commands="admin")
@@ -305,7 +305,7 @@ async def show_users(message: types.Message):
                     user_count = 0
                     for user in USERS:
                         user_count += 1
-                        user = ass_info_obj(user)
+                        user = Ass_Info_Obj(user)
                         if user.blacklisted == 1:  # if blacklisted
                             blacklisted = "✅"
                         else:
