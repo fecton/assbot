@@ -9,15 +9,6 @@
 </div><hr>
 
 <div>
-    <div>
-        <h3><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpngimg.com%2Fuploads%2Ffolder%2Ffolder_PNG8754.png&f=1&nofb=1" width="30"> Files:</h3>
-        <ul>
-            <li><b>avatar.jpg</b> — bot's avatar </li>
-            <li><b>config.py</b> — file with configuration parameters (TOKEN, SUPER_USERS, DEBUG)</li>
-            <li><b>main.py</b> — main file</li>
-            <li><b>messages.json</b> — file with bot's long messages (help, start, admin, about)</li>
-        </ul>
-    </div><hr>
     <div align=center>
         <h3>Recommended Python version: Python 3.9.5</h3>
     </div>
