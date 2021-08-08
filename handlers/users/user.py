@@ -29,9 +29,6 @@ async def report(message: types.Message):
                 message.from_user.id, message.from_user.username,
                 message.from_user.first_name, report_message]
 
-        if data[0] < 0:
-            data[0] *= -1
-
         # if it's personal message then message.chat will be marked "Personal message"
 
         if data[1] is None:
