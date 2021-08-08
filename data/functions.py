@@ -6,18 +6,25 @@ class Ass_Info_Obj:
     Used for better understanding ass_info
     """
 
-    def __init__(self, ass_info: tuple):
-        self.id = ass_info[0]
-        self.username = ass_info[1]
-        self.name = ass_info[2]
-        self.length = ass_info[3]
-        self.endtime = ass_info[4]
-        self.spamcount = ass_info[5]
-        self.blacklisted = ass_info[6]
+    def __init__(self, ass_info: [tuple, list]):
+        self.id            = ass_info[0]
+        self.username      = ass_info[1]
+        self.name          = ass_info[2]
+        self.length        = ass_info[3]
+        self.endtime       = ass_info[4]
+        self.spamcount     = ass_info[5]
+        self.blacklisted   = ass_info[6]
         self.luck_timeleft = ass_info[7]
 
 
 def user_input(message: types.Message, command: str) -> str:
+    '''
+    This function returns users output after command
+    Example: "/ban 23432422"
+        Returns: "23432422"
+    :param message: types.Message object gotten from handler
+    :param command: This is a commands which will be deleted with a space from message.text
+    '''
     text = message.text.replace(command + " ", "").strip()
     if command in text or command == "":
         return ""
@@ -125,7 +132,7 @@ def ass_main(message: types.Message, ass_info: [list, tuple], db, group_id: int)
             minutes = ((last_time // 60) - (last_time // 3600) * 60) * -1
             hours = last_time // 3600 * -1
 
-        output_message += "Продовжуй грати через {0} год., {1} хв.".format(hours, minutes)
+        output_message += "Продовжуй грати через {0} год. {1} хв.".format(hours, minutes)
 
         db.execute("""
                 UPDATE `{0}` SET length={1}, endtime={2}, spamcount=0 WHERE user_id={3}

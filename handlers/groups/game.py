@@ -135,7 +135,7 @@ async def is_lucky(message: types.Message):
         winrate = 30
 
         if winrate >= randint(1, 100):
-            from data.emojis import LUCK_fail_emojis
+            from data.emojis import LUCK_win_emojis
 
             await message.reply(
                 "@%s ОТРИМАВ ВИГРАШ! 📈\n%s Ти мене обікрав, забирай свій приз: %d см.\n"
@@ -179,13 +179,18 @@ async def leave(message: types.Message):
 
     db = sqlite3.connect(DB_NAME)
 
-    cursor = db.execute("""
-    SELECT * FROM `{0}` WHERE user_id={1}
-    """.format(message.chat.id, message.from_user.id))
+    try:
+        cursor = db.execute("""
+        SELECT * FROM `{0}` WHERE user_id={1}
+        """.format(message.chat.id, message.from_user.id))
+    except sqlite3.OperationalError:
+        await message.answer("⛔️ Ти не зарегестрований у грі!")
+        return
 
-    ass_info = Ass_Info_Obj(cursor.fetchone())
+    ass_info = cursor.fetchone()
 
-    if ass_info:  # if user isn't registered
+    if ass_info and ass_info is not None:  # if user isn't registered
+        ass_info = Ass_Info_Obj(ass_info)
         if ass_info.blacklisted:  # if user is blacklisted
             await message.reply("⛔️ Ні, дружок, таке не проканає 😏")
         else:  # if user isn't blacklisted
@@ -194,7 +199,7 @@ async def leave(message: types.Message):
             """.format(message.chat.id, message.from_user.id))
             await message.reply("✅ Ти покинув гру! Шкода такий гарний зад.")
     else:  # if user isn't registered
-        await message.reply("⛔️ Ти не зарегестрований у грі!")
+        await message.answer("⛔️ Ти не зарегестрований у грі!")
     db.commit()
     db.close()
 
