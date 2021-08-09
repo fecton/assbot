@@ -140,7 +140,7 @@ async def is_lucky(message: types.Message):
             await message.reply(
                 "@%s ОТРИМАВ ВИГРАШ! 📈\n%s Ти мене обікрав, забирай свій приз: %d см.\n"
                 "Зараз у тебе: %d см.\nПродовжуй грати через неділю!"
-                % (username, choice(LUCK_fail_emojis), length, length * 2))
+                % (username, choice(LUCK_win_emojis), length, length * 2))
             length *= 2
         else:
             from data.emojis import LUCK_fail_emojis
