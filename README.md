@@ -16,7 +16,6 @@
         <h3><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn2.iconfinder.com%2Fdata%2Ficons%2Fprogramming-17%2F24%2Fprogramming-module-2-512.png&f=1&nofb=1" width="30"> Modules in use:</h3>
     </div>
     <ul>
-        <li><b>json</b></li>
         <li><b>random</b></li>
         <li><b>sqlite3</b></li>
         <li><b>os</b></li>
