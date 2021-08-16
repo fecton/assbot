@@ -11,4 +11,3 @@ async def set_default_commands(dp):
         types.BotCommand("about", "про розробника"),
         types.BotCommand("help", "довідка"),
     ])
-

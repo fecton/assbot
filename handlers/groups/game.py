@@ -4,7 +4,7 @@ from aiogram import types
 from loader import dp
 from data.config import DB_NAME
 from data.long_messages import long_messages
-from data.functions import Ass_Info_Obj, ass_main
+from data.functions import AssInfoObj, ass_main
 from filters import IsGroup
 
 
@@ -99,7 +99,6 @@ async def is_lucky(message: types.Message):
 
     group_id = message.chat.id
     user_id = message.from_user.id
-    username = message.from_user.username
     firstname = message.from_user.first_name
 
     # if a group wasn't registered
@@ -119,7 +118,7 @@ async def is_lucky(message: types.Message):
 
     # if a user's length is too small
     if length < 100:
-        await message.reply("⛔️ Твоя сідничка дуже мала! (мін. 100 см)")
+        await message.reply("⛔️ Як підростеш до 100 см тоді повертайся")
         db.close()
         return
     
@@ -133,9 +132,8 @@ async def is_lucky(message: types.Message):
 
         # chance of win
         winrate = 30
-        kWin = 2
-        kFail = 0.5
-
+        k_win = 2
+        k_fail = 0.5
 
         if winrate >= randint(1, 100):
             from data.emojis import LUCK_win_emojis
@@ -145,9 +143,9 @@ async def is_lucky(message: types.Message):
                 "%s Твій приз: %d см\n"
                 "📍 Зараз у тебе: %d см\n\n"
                 "Продовжуй грати через неділю!"
-                % (firstname, choice(LUCK_win_emojis), length * kWin - length, length * kWin))
+                % (firstname, choice(LUCK_win_emojis), length * k_win - length, length * k_win))
             
-            length *= kWin
+            length *= k_win
         
         else:
             from data.emojis import LUCK_fail_emojis
@@ -157,9 +155,9 @@ async def is_lucky(message: types.Message):
                 "%s Ти програв: %d см\n"
                 "📍 Зараз у тебе: %d см\n\n"
                 "Продовжуй грати через неділю!"
-                % (firstname, choice(LUCK_fail_emojis), length * kFail, length - length * kFail))
+                % (firstname, choice(LUCK_fail_emojis), length * k_fail, length - length * k_fail))
             
-            length -= length * kFail
+            length -= length * k_fail
 
         # write length to db
         db.execute("UPDATE `%d` SET length=%d WHERE user_id=%d" % (group_id, length, user_id))
@@ -202,7 +200,7 @@ async def leave(message: types.Message):
         db.close()
         return
 
-    ass_info = Ass_Info_Obj(ass_info)
+    ass_info = AssInfoObj(ass_info)
     if ass_info.blacklisted:  # if user is blacklisted
         await message.reply("⛔️ Ні, дружок, таке не проканає 😏")
     else:  # if user isn't blacklisted
@@ -245,7 +243,7 @@ async def statistic(message: types.Message):
         # user_data = list(user_data)
 
         # (user_id, username, fisrtname, length, endtime, spamcount, blacklisted)
-        user_data = Ass_Info_Obj(user_data)
+        user_data = AssInfoObj(user_data)
         
         if user_data.blacklisted:
             output_message += "💢 {1} залишився без дупи через спам\n".format(i, user_data.name)
@@ -253,7 +251,7 @@ async def statistic(message: types.Message):
 
         if i < len(STATISTIC_top_emojis):  # with emojis
             if i == 0:  # if is king
-                if user_data.length == 0: # "👑  Безжопий царь {username}"
+                if user_data.length == 0:  # "👑  Безжопий царь {username}"
                     output_message += "     %s Безжопий царь %s\n\n" % (STATISTIC_top_emojis[i]+" ", user_data.name)
                 else:                     # "👑  Царь {username}"
                     output_message += "     %s Царь %s — %d см\n\n" % (

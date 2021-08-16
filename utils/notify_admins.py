@@ -11,7 +11,7 @@ async def on_startup_notify(dp: Dispatcher):
             await dp.bot.send_message(
                 admin, 
                 "Бот '%s' запущен успешно\nВремя запуска: %s" 
-                    % (bot_info.first_name, time.asctime( time.localtime(time.time()) ))
+                % (bot_info.first_name, time.asctime(time.localtime(time.time())))
             )
         except Exception as err:
             print(err)

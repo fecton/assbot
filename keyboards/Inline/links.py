@@ -10,4 +10,3 @@ about_keyboard.row(
 about_keyboard.row(
     types.InlineKeyboardButton("🔵 Telegram Channel", url=long_messages["links"]["telegram_channel"])
 )
-

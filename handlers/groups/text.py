@@ -23,4 +23,3 @@ async def send_about(message: types.Message):
         disable_web_page_preview=True, 
         reply_markup=about_keyboard
     )
-
