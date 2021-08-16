@@ -10,7 +10,7 @@
 # ------------------------------
 # Enjoy using! ^_^
 
-__version__ = "1.4.1"
+__version__ = "1.5"
 
 from utils.set_bot_commands import set_default_commands
 from aiogram import Dispatcher

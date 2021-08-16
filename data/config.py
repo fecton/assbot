@@ -1,6 +1,5 @@
 from os import getenv
 from dotenv import load_dotenv
-from .long_messages import long_messages
 
 load_dotenv()  # Initialization
 

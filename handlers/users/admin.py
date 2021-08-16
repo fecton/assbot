@@ -2,8 +2,9 @@ import sqlite3
 from aiogram import types
 from loader import dp
 
-from data.config import long_messages, SUPER_USERS, DB_NAME
+from data.config import SUPER_USERS, DB_NAME
 from data.functions import user_input, Ass_Info_Obj
+from data.long_messages import long_messages
 
 
 @dp.message_handler(commands="admin")
@@ -40,11 +41,11 @@ async def show_groups(message: types.Message):
         for group in groups_info:
             groups_dict[group[0]] = group[1]
 
-        output_message = "✅ __*TABLES*__\n" + "=" * 16 + "\n"
+        output_message = "✅ <i><b>TABLES</b></i>\n" + "=" * 16 + "\n"
         for key in groups_dict.keys():
-            output_message += "`%s`" % str(key) + " : " + groups_dict[key] + "\n"
+            output_message += "<code>%s</code>" % str(key) + " : " + groups_dict[key] + "\n"
 
-        await message.reply(output_message, parse_mode="Markdown")
+        await message.reply(output_message)
 
 
 @dp.message_handler(commands="bl")
@@ -98,7 +99,7 @@ async def show_blacklisted_users(message: types.Message):
                     output_message += "\n📌 Totally: 1 user"
                 else:
                     output_message += "\n📌 Totally: %d users" % users_count
-                await message.reply(output_message, parse_mode="HTML")
+                await message.reply(output_message)
 
 
 @dp.message_handler(commands="ban")
@@ -318,7 +319,7 @@ async def show_users(message: types.Message):
                     else:
                         output_message += f"\n📌 Totally: {user_count} users"
 
-                    await message.reply(output_message, parse_mode="HTML")
+                    await message.reply(output_message)
                 except sqlite3.OperationalError:
                     await message.reply("⛔️ Такої групи не існує")
                 finally:

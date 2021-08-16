@@ -1,3 +1,4 @@
+from typing import Union
 from aiogram import types
 
 
@@ -6,7 +7,7 @@ class Ass_Info_Obj:
     Used for better understanding ass_info
     """
 
-    def __init__(self, ass_info: [tuple, list]):
+    def __init__(self, ass_info: Union[tuple, list]):
         self.id            = ass_info[0]
         self.username      = ass_info[1]
         self.name          = ass_info[2]
@@ -31,7 +32,7 @@ def user_input(message: types.Message, command: str) -> str:
     return text
 
 
-def ass_main(message: types.Message, ass_info: [list, tuple], db, group_id: int) -> str:
+def ass_main(message: types.Message, ass_info: Union[list, tuple], db, group_id: int) -> str:
     """
     This function is backend part of function `ass`
 
@@ -85,12 +86,6 @@ def ass_main(message: types.Message, ass_info: [list, tuple], db, group_id: int)
         """.format(group_id, ass_info.spamcount + 1, ass_info.id))
     else:
 
-        # TODO: Make message which will be sent when user achieve some aim
-        # For example:
-        # 200 см - "Фіга вона велечезна"
-        # 400 см - "Хай впаде на мене метеорит"
-        # etc.
-
         from random import randint
 
         tmp_length = randint(-8, 15)
@@ -109,7 +104,11 @@ def ass_main(message: types.Message, ass_info: [list, tuple], db, group_id: int)
                 "підросла на {0} см! Зараз твоя дупця прям бомбезна. ".format(tmp_length)
             )
         elif tmp_length < 0:
-            if not ass_info.length - tmp_length <= 0:
+            if ass_info.length + tmp_length <= 0:
+                output_message += (
+                    "зникла! "
+                )
+            else:
                 output_message += (
                     "зменшилась на {0} см! Зараз твоя дупця вже не файна. ".format(tmp_length * -1)
                 )
