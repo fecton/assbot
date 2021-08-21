@@ -21,5 +21,5 @@ async def send_about(message: types.Message):
     await message.answer(
         long_messages["links"]["text"], 
         disable_web_page_preview=True, 
-        reply_markup=about_keyboard
+        reply_markup=about_keyboard,
     )

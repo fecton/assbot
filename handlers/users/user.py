@@ -39,15 +39,9 @@ async def report(message: types.Message):
 
         db = sqlite3.connect(DB_NAME)
         from database.insert import INSERT_into_reports
-        try:
-            db.execute(INSERT_into_reports, data)
-        except sqlite3.OperationalError:
-            from database.create import CREATE_table_reports
 
-            db.execute(CREATE_table_reports)
+        db.execute(INSERT_into_reports, data)
 
-            db.execute(INSERT_into_reports, data)
-            print("[+] Table `reports` didn't exist and was created!")
         db.commit()
         db.close()
         await message.reply("Дякуємо за звіт! 💛")

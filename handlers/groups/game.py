@@ -22,17 +22,10 @@ async def ass(message: types.Message):
     first_name = message.from_user.first_name
 
     db = sqlite3.connect(DB_NAME)
-    try:
-        cursor = db.execute("""
-        SELECT * FROM `{0}` WHERE user_id={1}
-        """.format(group_id, user_id))
-    except sqlite3.OperationalError:
-        from database.create import CREATE_table_groups
-        db.execute(CREATE_table_groups % group_id)
-        db.commit()
-        cursor = db.execute("""
-        SELECT * FROM `{0}` WHERE user_id={1}
-        """.format(group_id, user_id))
+
+    cursor = db.execute("""
+    SELECT * FROM `{0}` WHERE user_id={1}
+    """.format(group_id, user_id))
             
     ass_info = cursor.fetchone()
 
@@ -102,19 +95,19 @@ async def is_lucky(message: types.Message):
     firstname = message.from_user.first_name
 
     # if a group wasn't registered
-    try:
-        db.execute("SELECT * FROM `%d`" % group_id)
-        inf = db.execute(
-            "SELECT luck_timeleft, length, spamcount FROM `%d` WHERE user_id=%d" % (group_id, user_id)
-        ).fetchone()
-        if inf is None:
-            raise sqlite3.OperationalError
-        else:
-            luck_timeleft, length, spamcount = inf
-    except sqlite3.OperationalError:
+
+    db.execute("SELECT * FROM `%d`" % group_id)
+    
+    inf = db.execute(
+        "SELECT luck_timeleft, length, spamcount FROM `%d` WHERE user_id=%d" % (group_id, user_id)
+    ).fetchone()
+
+    if inf is None:
         await message.reply("⛔️ Ти не зарегестрований у грі: пиши /ass")
         db.close()
         return
+    else:
+        luck_timeleft, length, spamcount = inf
 
     # if a user's length is too small
     if length < 100:
@@ -132,8 +125,8 @@ async def is_lucky(message: types.Message):
 
         # chance of win
         winrate = 30
-        k_win = 2
-        k_fail = 0.5
+        k_win = 2  # 200%
+        k_fail = 0.5   # 50%
 
         if winrate >= randint(1, 100):
             from data.emojis import LUCK_win_emojis
@@ -173,7 +166,7 @@ async def is_lucky(message: types.Message):
         days_left = ceil(int(luck_timeleft - time()) / 86400)
         # answer with a count of days
         if days_left == 1:
-            await message.reply("⛔️ Завтра ми відкриємо для тебе наші двері!")
+            await message.reply("⛔️ Неділя ще не пройшла! Залишився 1 день.")
         else:
             await message.reply("⛔️ Неділя ще не пройшла! Залишилося %d д." % days_left)
         # increment spamcount and write it
@@ -189,13 +182,11 @@ async def leave(message: types.Message):
 
     db = sqlite3.connect(DB_NAME)
 
-    try:
-        ass_info = db.execute("""
-        SELECT * FROM `{0}` WHERE user_id={1}
-        """.format(message.chat.id, message.from_user.id)).fetchone()
-        if not ass_info or ass_info is None:
-            raise sqlite3.OperationalError
-    except sqlite3.OperationalError:
+    ass_info = db.execute("""
+    SELECT * FROM `{0}` WHERE user_id={1}
+    """.format(message.chat.id, message.from_user.id)).fetchone()
+
+    if not ass_info or ass_info is None:
         await message.answer("⛔️ Ти не зарегестрований у грі!")
         db.close()
         return
@@ -221,14 +212,14 @@ async def statistic(message: types.Message):
     """
 
     db = sqlite3.connect(DB_NAME)
-    try:
-        cursor = db.execute("""
-            SELECT * FROM `{0}` ORDER BY blacklisted ASC, length DESC
-        """.format(message.chat.id))
-        users_data = cursor.fetchall()
-        if not users_data:
-            raise sqlite3.OperationalError
-    except sqlite3.OperationalError:
+
+    cursor = db.execute("""
+        SELECT * FROM `{0}` ORDER BY blacklisted ASC, length DESC
+    """.format(message.chat.id))
+
+    users_data = cursor.fetchall()
+    
+    if not users_data:
         await message.reply("⛔️ Нема гравців! Стань першим!")
         db.close()
         return

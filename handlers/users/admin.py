@@ -42,10 +42,11 @@ async def show_groups(message: types.Message):
     for group in groups_info:
         groups_dict[group[0]] = group[1]
 
-    output_message = "✅ <i><b>TABLES</b></i>\n" + "=" * 16 + "\n"
+    output_message = "✅ <i><b>TABLES</b></i>\n" + "-" * 16 + "\n"
     if len(groups_dict.keys()) != 0:
         for key in groups_dict.keys():
             output_message += "<code>%s</code>" % str(key) + " : " + groups_dict[key] + "\n"
+        output_message += "-" * 16
     else:
         await message.answer("⛔️ Ще нема груп!")
         return
@@ -201,10 +202,18 @@ async def unban(message: types.Message):
 
         db = sqlite3.connect(DB_NAME)
         try:
-            db.execute("""
-                UPDATE `{0}` SET blacklisted=0, spamcount=0 WHERE user_id={1}
-            """.format(group_id, user_id))
-            await message.answer("✅ Користувач може повернутися до гри!")
+            user_is_blacklisted = db.execute(
+                "SELECT blacklisted FROM `%d` WHERE user_id=%d" % (group_id, user_id)
+            ).fetchone()[0]
+
+            if user_is_blacklisted:
+                db.execute("""
+                    UPDATE `{0}` SET blacklisted=0, spamcount=0 WHERE user_id={1}
+                """.format(group_id, user_id))
+                await message.answer("✅ Користувач може повернутися до гри!")
+            else:
+                await message.answer("❌ Користувач не заблокований!")
+
         except sqlite3.OperationalError:
             await message.answer("⛔️ Дана группа не існує!")
         finally:
@@ -225,7 +234,7 @@ async def show_reports(message: types.Message):
     db.close()
 
     if users:  # if users exist in group's table
-        output_message = "USERNAME : NAME : MESSAGE\n\n"
+        output_message = "USERNAME:NAME:MESSAGE\n\n"
         for user in users:
             output_message += f"🚩 {user[4]} : {user[5]}\n"
         await message.answer(output_message)
@@ -294,7 +303,7 @@ async def show_users(message: types.Message):
             try:
                 users = db.execute("SELECT * FROM `%d`" % group_id).fetchall()
                 output_message = "👥 Group: <code>%s</code>\n" % group_id
-                output_message += "ID : USERNAME:NAME : SPAMCOUNT: IS_BANNED\n\n"
+                output_message += "ID:USERNAME:NAME:SPAMCOUNT:IS_BANNED\n\n"
 
                 user_count = 0
                 for user in users:

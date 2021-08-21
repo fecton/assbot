@@ -1,12 +1,13 @@
 import sqlite3
 
 from loader import dp
+from aiogram import types
 from data.config import DB_NAME
+from filters import IsJoined, IsLeft
 
 
-@dp.message_handler(content_types="new_chat_members")
-@dp.message_handler(lambda message: message.from_user.id == 1777031958)
-async def start(message):
+@dp.message_handler(IsJoined(), content_types="new_chat_members")
+async def bot_joined(message: types.Message):
     from database.create import CREATE_table_groups
     from database.insert import INSERT_into_groups_name
 
@@ -22,3 +23,13 @@ async def start(message):
     db.commit()
     db.close()
     print("[+] Table with name '%d' (%s) created successfully!" % (group_id, message.chat.title))
+
+
+@dp.message_handler(IsLeft(), content_types="left_chat_member")
+async def bot_left(message: types.Message):
+    chat_id = message.chat.id
+    
+    db = sqlite3.connect(DB_NAME)
+    db.execute("DROP TABLE `%d`" % chat_id)
+    print("[+] The group %d has deleted!" % chat_id)
+    db.close()
