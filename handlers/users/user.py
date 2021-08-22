@@ -20,9 +20,7 @@ async def report(message: types.Message):
             await message.reply("⛔️ Ти забув уввести свій звіт!")
         else:
             await message.reply("⛔️ Звіт дуже малий!")
-    elif message.text[2] == "@":
-        await message.reply("⛔️ Невірний формат!")
-    elif "--" in message.text or "#" in message.text:
+    elif message.text[2] == "@" or "--" in message.text or "#" in message.text:
         await message.reply("⛔️ Невірний формат!")
     else:
 
@@ -32,9 +30,9 @@ async def report(message: types.Message):
 
         # if it's personal message then message.chat will be marked "Personal message"
 
-        if data[1] is None:
+        if data[1] is None:  # a private chat or a group
             data[1] = "Private"
-        if data[3] is None:
+        if data[3] is None:  # if a user doesn't have username
             data[3] = "N/A"
 
         db = sqlite3.connect(DB_NAME)
@@ -45,8 +43,6 @@ async def report(message: types.Message):
         db.commit()
         db.close()
         await message.reply("Дякуємо за звіт! 💛")
-
-        print("[R] A report had sent!")
 
         for admin in SUPER_USERS:
             if data[3] == "N/A":

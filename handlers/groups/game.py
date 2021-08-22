@@ -111,7 +111,7 @@ async def is_lucky(message: types.Message):
 
     # if a user's length is too small
     if length < 100:
-        await message.reply("⛔️ Як підростеш до 100 см тоді повертайся")
+        await message.reply("⛔️ Як підростеш до 100 см, тоді і повертайся")
         db.close()
         return
     
@@ -158,8 +158,7 @@ async def is_lucky(message: types.Message):
         # define and write timeleft to db
         luck_timeleft = int(time()) + 604800  # +week
         db.execute("UPDATE `%d` SET luck_timeleft=%d WHERE user_id=%d" % (group_id, luck_timeleft, user_id))
-        
-        db.commit()
+
     else:
         from math import ceil
         # define time left
@@ -173,6 +172,7 @@ async def is_lucky(message: types.Message):
         spamcount += 1
         db.execute("UPDATE `%d` SET spamcount=%d WHERE user_id=%d" % (group_id, spamcount, user_id))
 
+    db.commit()
     db.close()
 
 

@@ -1,16 +1,20 @@
 import sqlite3
+import re
 
 from aiogram import types
 from loader import dp
 
 from data.config import DB_NAME
-from data.functions import user_input, AssInfoObj
+from data.functions import user_input
 from data.long_messages import long_messages
 from filters import IsAdmin
 
 
 @dp.message_handler(IsAdmin(), commands="admin")
-async def send_adminhelp(message: types.Message):
+async def show_adminhelp(message: types.Message):
+    """
+    Admin help
+    """
     await message.answer(long_messages["admin"])
 
 
@@ -19,7 +23,6 @@ async def show_groups(message: types.Message):
     """
     This function shows all registered in the game groups (its id and its name)
     """
-
     db = sqlite3.connect(DB_NAME)
 
     try:
@@ -47,10 +50,9 @@ async def show_groups(message: types.Message):
         for key in groups_dict.keys():
             output_message += "<code>%s</code>" % str(key) + " : " + groups_dict[key] + "\n"
         output_message += "-" * 16
+        await message.answer(output_message)
     else:
         await message.answer("⛔️ Ще нема груп!")
-        return
-    await message.answer(output_message)
 
 
 @dp.message_handler(IsAdmin(), commands="bl")
@@ -67,9 +69,7 @@ async def show_blacklisted_users(message: types.Message):
         if group_id == "self":
             group_id = message.chat.id
         else:
-            try:
-                group_id = int(group_id)
-            except ValueError:
+            if re.search(r"[A-Za-z]", group_id):
                 await message.answer("⛔️ Вибач, але не знаю такої групи.")
                 return
 
@@ -122,39 +122,43 @@ async def ban(message: types.Message):
     if info[0] == "self":
         ban_group = message.chat.id
     else:
-        ban_group = int(info[0])
+        ban_group = info[0]
 
     # select yourself
     if info[1] == "self":
         user_to_ban = message.from_user.id
     else:
-        user_to_ban = int(info[1])
+        user_to_ban = info[1]
+
+    if re.search(r"[A-Za-z]", info[0]) or re.search(r"[A-Za-z]", info[1]):
+        await message.answer("⛔️ Невірний формат!")
+        return
+    else:
+        info[0], info[1] = int(info[0]), int(info[1])
 
     if not user_to_ban:
         await message.answer("⛔️ Можливо ти щось забув?")
     else:
         try:
-            user_id = user_to_ban
-            group_id = ban_group
             db = sqlite3.connect(DB_NAME)
 
             # if group exists
             try:
                 db.execute(f"""
-                    SELECT * FROM `{group_id}`
+                    SELECT * FROM `{ban_group}`
                 """)
             except sqlite3.OperationalError:
                 await message.answer("⛔️ Не існує такої групи!")
                 return
 
             user = db.execute(f"""
-                SELECT * FROM `{group_id}` WHERE user_id={user_id}
+                SELECT * FROM `{ban_group}` WHERE user_id={user_to_ban}
             """).fetchone()
 
             # if user exists
             if user:
                 db.execute(f"""
-                    UPDATE `{group_id}` SET blacklisted=1 WHERE user_id={user_id}
+                    UPDATE `{ban_group}` SET blacklisted=1 WHERE user_id={user_to_ban}
                 """)
                 await message.answer("✅ Користувач отримав по своїй сідничці!")
             else:
@@ -194,11 +198,11 @@ async def unban(message: types.Message):
         await message.answer("⛔️ Ти забув уввести ID заблокованого користувача!")
     else:
         if user_id != "self" or group_id != "self":
-            try:
-                user_id, group_id = int(user_id), int(group_id)
-            except ValueError:
+            if re.search(r"[A-Za-z]", user_id) or re.search(r"[A-Za-z]", group_id):
                 await message.answer("⛔️ Невірний формат!")
                 return
+            else:
+                user_id, group_id = int(user_id), int(group_id)
 
         db = sqlite3.connect(DB_NAME)
         try:
@@ -255,7 +259,7 @@ async def show_dreports(message: types.Message):
     db.close()
 
     if users:  # if users exist in group's table
-        output_message = "USERNAME : NAME : MESSAGE\n\n"
+        output_message = "USERNAME:NAME:MESSAGE\n\n"
         for user in users:
             output_message += f"🚩 {user[0]} : {user[1]} : {user[2]} : {user[3]} : {user[4]} : {user[5]}\n\n"
         await message.answer(output_message)
@@ -296,38 +300,39 @@ async def show_users(message: types.Message):
     if group_id == "self":
         group_id = message.chat.id
     if group_id:
-        try:
-            group_id = int(group_id)
-            db = sqlite3.connect(DB_NAME)
-            # (user_id, username, firstname, length, endtime, spamcount, blacklisted)
-            try:
-                users = db.execute("SELECT * FROM `%d`" % group_id).fetchall()
-                output_message = "👥 Group: <code>%s</code>\n" % group_id
-                output_message += "ID:USERNAME:NAME:SPAMCOUNT:IS_BANNED\n\n"
-
-                user_count = 0
-                for user in users:
-                    user_count += 1
-                    user = AssInfoObj(user)
-                    if user.blacklisted == 1:  # if blacklisted
-                        blacklisted = "✅"
-                    else:
-                        blacklisted = "❌"
-                    output_message += f" ▶️ <code>{user.id}</code> : <b>{user.username}</b> : <b>{user.name}</b>"\
-                                      f" : {user.spamcount} : {blacklisted}\n"
-
-                if user_count == 1:
-                    output_message += "\n📌 Totally: 1 user"
-                else:
-                    output_message += f"\n📌 Totally: {user_count} users"
-
-                await message.answer(output_message)
-            except sqlite3.OperationalError:
-                await message.answer("⛔️ Такої групи не існує")
-            finally:
-                db.close()
-
-        except ValueError:
+        if re.search(r"[A-Za-z]", group_id):
             await message.answer("⛔️ Невірний формат!")
+            return
+
+        group_id = int(group_id)
+        db = sqlite3.connect(DB_NAME)
+        # (user_id, username, firstname, length, endtime, spamcount, blacklisted)
+        try:
+            from data.functions import AssInfoObj
+            users = db.execute("SELECT * FROM `%d`" % group_id).fetchall()
+            output_message = "👥 Group: <code>%s</code>\n" % group_id
+            output_message += "ID:USERNAME:NAME:SPAMCOUNT:IS_BANNED\n\n"
+
+            user_count = 0
+            for user in users:
+                user_count += 1
+                user = AssInfoObj(user)
+                if user.blacklisted == 1:  # if blacklisted
+                    blacklisted = "✅"
+                else:
+                    blacklisted = "❌"
+                output_message += f" ▶️ <code>{user.id}</code> : <b>{user.username}</b> : <b>{user.name}</b>"\
+                                  f" : {user.spamcount} : {blacklisted}\n"
+
+            if user_count == 1:
+                output_message += "\n📌 Totally: 1 user"
+            else:
+                output_message += f"\n📌 Totally: {user_count} users"
+
+            await message.answer(output_message)
+        except sqlite3.OperationalError:
+            await message.answer("⛔️ Такої групи не існує")
+        finally:
+            db.close()
     else:
         await message.answer("⛔️ Ти забув про ідентифікатор групи!")
