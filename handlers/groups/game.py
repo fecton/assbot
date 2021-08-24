@@ -4,7 +4,7 @@ from aiogram import types
 from loader import dp
 from data.config import DB_NAME
 from data.long_messages import long_messages
-from data.functions import AssInfoObj, ass_main
+from data.functions import AssCore
 from filters import IsGroup
 
 
@@ -33,16 +33,16 @@ async def ass(message: types.Message):
     if ass_info is None:  # if user didn't be registered in the game
         if username is None:  # if user doesn't have username
             username = first_name
-        ass_info = (user_id, username, first_name, 0, 0, 0, 0, 0)
+        ass_info = AssCore((user_id, username, first_name, 0, 0, 0, 0, 0))
 
         db.execute("""
             INSERT INTO `%d`(user_id, username, name, length, endtime, spamcount, blacklisted, luck_timeleft)
             VALUES (?,?,?,?,?,?,?,?)
-        """ % group_id, ass_info)
+        """ % group_id, (user_id, username, first_name, 0, 0, 0, 0, 0))
 
         await message.reply(
             "👋 Вітаю в нашій когорті, хлопче/дівчино!\n"
-            + ass_main(message, ass_info, db, group_id))
+            + ass_info.ass_main(message, db, group_id))
     else:
         ass_info = list(ass_info)
         if ass_info[1] != username or ass_info[2] != first_name:
@@ -59,22 +59,22 @@ async def ass(message: types.Message):
             )
 
         from time import time
-        is_blacklisted = ass_info[6]
-        endtime = ass_info[4]
-        spamcount = ass_info[5]
-        if is_blacklisted:  # if already blacklisted
+
+        ass_info = AssCore(ass_info)
+
+        if ass_info.blacklisted:  # if already blacklisted
             await message.reply("💢 %s, дружок, ти вже награвся, шуруй звідси." % first_name)
         else:  # if not blacklisted
-            if int(time()) >= endtime:  # if last_time already pasted
-                await message.reply(ass_main(message, ass_info, db, group_id))
+            if int(time()) >= ass_info.endtime:  # if last_time already pasted
+                await message.reply(ass_info.ass_main(message, db, group_id))
             else:
-                if spamcount == 5:  # if spamcount == 5 -> blacklisted
+                if ass_info.spamcount == 5:  # if spamcount == 5 -> blacklisted
                     db.execute("""
                         UPDATE `{0}` SET blacklisted=1, length=0 WHERE user_id={1}
                     """.format(group_id, user_id))
                     await message.reply(first_name + long_messages["spam"])
                 else:
-                    await message.reply(ass_main(message, ass_info, db, group_id))
+                    await message.reply(ass_info.ass_main(message, db, group_id))
 
     db.commit()
     db.close()
@@ -191,7 +191,7 @@ async def leave(message: types.Message):
         db.close()
         return
 
-    ass_info = AssInfoObj(ass_info)
+    ass_info = AssCore(ass_info)
     if ass_info.blacklisted:  # if user is blacklisted
         await message.reply("⛔️ Ні, дружок, таке не проканає 😏")
     else:  # if user isn't blacklisted
@@ -234,7 +234,7 @@ async def statistic(message: types.Message):
         # user_data = list(user_data)
 
         # (user_id, username, fisrtname, length, endtime, spamcount, blacklisted)
-        user_data = AssInfoObj(user_data)
+        user_data = AssCore(user_data)
         
         if user_data.blacklisted:
             output_message += "💢 {1} залишився без дупи через спам\n".format(i, user_data.name)

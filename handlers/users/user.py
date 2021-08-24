@@ -46,6 +46,12 @@ async def report(message: types.Message):
 
         for admin in SUPER_USERS:
             if data[3] == "N/A":
-                await dp.bot.send_message(admin, "[R] Надісланий звіт від %s, детальніше: /reports" % data[4])
+                await dp.bot.send_message(
+                    admin,
+                    "[R] Надісланий звіт від %s, детальніше: /reports, /dreports" % data[4]
+                )
             else:
-                await dp.bot.send_message(admin, "[R] Надісланий звіт від @%s, детальніше: /reports" % data[3])
+                await dp.bot.send_message(
+                    admin,
+                    "[R] Надісланий звіт від @%s, детальніше: /reports, /dreports" % data[3]
+                )

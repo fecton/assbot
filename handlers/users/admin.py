@@ -11,7 +11,7 @@ from filters import IsAdmin
 
 
 @dp.message_handler(IsAdmin(), commands="admin")
-async def show_adminhelp(message: types.Message):
+async def show_admin_help(message: types.Message):
     """
     Admin help
     """
@@ -182,47 +182,45 @@ async def unban(message: types.Message):
         await message.answer("⛔️ Невірний формат!")
         return
 
-        # select current group
+    # select current group
     if info[0] == "self" and message.chat.type != "private":
         group_id = message.chat.id
     else:
         group_id = info[0]
+        if re.search(r"[A-Za-z]", group_id):
+            await message.answer("⛔️ Невірний формат!")
+            return
+        group_id = int(group_id)
 
     # select yourself
     if info[1] == "self":
         user_id = message.from_user.id
     else:
         user_id = info[1]
+        if re.search(r"[A-Za-z]", user_id):
+            await message.answer("⛔️ Невірний формат!")
+            return
+        user_id = int(user_id)
 
-    if not user_id:
-        await message.answer("⛔️ Ти забув уввести ID заблокованого користувача!")
-    else:
-        if user_id != "self" or group_id != "self":
-            if re.search(r"[A-Za-z]", user_id) or re.search(r"[A-Za-z]", group_id):
-                await message.answer("⛔️ Невірний формат!")
-                return
-            else:
-                user_id, group_id = int(user_id), int(group_id)
+    db = sqlite3.connect(DB_NAME)
+    try:
+        user_is_blacklisted = db.execute(
+            "SELECT blacklisted FROM `%d` WHERE user_id=%d" % (group_id, user_id)
+        ).fetchone()[0]
 
-        db = sqlite3.connect(DB_NAME)
-        try:
-            user_is_blacklisted = db.execute(
-                "SELECT blacklisted FROM `%d` WHERE user_id=%d" % (group_id, user_id)
-            ).fetchone()[0]
+        if user_is_blacklisted:
+            db.execute("""
+                UPDATE `{0}` SET blacklisted=0, spamcount=0 WHERE user_id={1}
+            """.format(group_id, user_id))
+            await message.answer("✅ Користувач може повернутися до гри!")
+        else:
+            await message.answer("❌ Користувач не заблокований!")
 
-            if user_is_blacklisted:
-                db.execute("""
-                    UPDATE `{0}` SET blacklisted=0, spamcount=0 WHERE user_id={1}
-                """.format(group_id, user_id))
-                await message.answer("✅ Користувач може повернутися до гри!")
-            else:
-                await message.answer("❌ Користувач не заблокований!")
-
-        except sqlite3.OperationalError:
-            await message.answer("⛔️ Дана группа не існує!")
-        finally:
-            db.commit()
-            db.close()
+    except sqlite3.OperationalError:
+        await message.answer("⛔️ Дана группа не існує!")
+    finally:
+        db.commit()
+        db.close()
 
 
 # SHOW REPORTS FROM TABLE `reports` in simple form
@@ -248,7 +246,7 @@ async def show_reports(message: types.Message):
 
 # SHOW REPORTS FROM TABLE `reports` in detailed form
 @dp.message_handler(IsAdmin(), commands="dreports")
-async def show_dreports(message: types.Message):
+async def show_detailed_reports(message: types.Message):
     """
     This function show all rows from table `reports` and send it in one message
     """
@@ -308,15 +306,15 @@ async def show_users(message: types.Message):
         db = sqlite3.connect(DB_NAME)
         # (user_id, username, firstname, length, endtime, spamcount, blacklisted)
         try:
-            from data.functions import AssInfoObj
+            from data.functions import AssCore
             users = db.execute("SELECT * FROM `%d`" % group_id).fetchall()
             output_message = "👥 Group: <code>%s</code>\n" % group_id
-            output_message += "ID:USERNAME:NAME:SPAMCOUNT:IS_BANNED\n\n"
+            output_message += "ID:USERNAME:NAME:SPAM COUNT:IS_BANNED\n\n"
 
             user_count = 0
             for user in users:
                 user_count += 1
-                user = AssInfoObj(user)
+                user = AssCore(user)
                 if user.blacklisted == 1:  # if blacklisted
                     blacklisted = "✅"
                 else:
