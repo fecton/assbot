@@ -1,5 +1,6 @@
 from typing import Union
 from aiogram import types
+from utils.db_core import DbCore
 
 
 class AssCore:
@@ -20,17 +21,18 @@ class AssCore:
 
         self.ass_info = ass_info
 
-    def ass_main(self, message: types.Message, db, group_id: int) -> str:
+    def ass_main(self, message: types.Message, group_id: int) -> str:
         """
         This function is backend part of function `ass`
 
         :param message:  object message from handler
-        :param db: Yeah, it's a database
         :param group_id: Yeah, that's a group id
         :return:         Send to a database an query which change data.
         """
 
         from time import time
+
+        db = DbCore()
 
         if self.endtime > int(time()):
             last_time = self.endtime - int(time())
@@ -67,8 +69,8 @@ class AssCore:
                     )
 
             db.execute("""
-                UPDATE `{0}` SET spamcount={1} WHERE user_id={2}
-            """.format(group_id, self.spamcount + 1, self.id))
+                UPDATE `%d` SET spamcount=%d WHERE user_id=%d
+            """ % (group_id, self.spamcount + 1, self.id))
         else:
 
             from random import randint
@@ -106,8 +108,8 @@ class AssCore:
             else:
                 output_message += "\nНаразі ваша дупенція становить: {0} см. ".format(self.length)
 
-            end_time = int(time()) + randint(3600, 72000)  # from 1 hour to 20 hours
-            last_time = end_time - int(time())
+            self.endtime = int(time()) + randint(3600, 72000)  # from 1 hour to 20 hours
+            last_time = self.endtime - int(time())
 
             if last_time >= 0:
                 minutes = (last_time // 60) - (last_time // 3600) * 60
@@ -119,8 +121,8 @@ class AssCore:
             output_message += "Продовжуй грати через {0} год. {1} хв.".format(hours, minutes)
 
             db.execute("""
-                    UPDATE `{0}` SET length={1}, endtime={2}, spamcount=0 WHERE user_id={3}
-                """.format(group_id, self.length, end_time, self.id))
+                    UPDATE `%d` SET length=%d, endtime=%d, spamcount=0 WHERE user_id=%d
+                """ % (group_id, self.length, self.endtime, self.id), commit=True)
 
         return output_message
 

@@ -1,8 +1,6 @@
-import sqlite3
-
 from aiogram import types
-from loader import dp
-from data.config import DB_NAME, SUPER_USERS
+from loader import dp, db
+from data.config import SUPER_USERS
 from data.functions import user_input
 
 
@@ -35,13 +33,8 @@ async def report(message: types.Message):
         if data[3] is None:  # if a user doesn't have username
             data[3] = "N/A"
 
-        db = sqlite3.connect(DB_NAME)
-        from database.insert import INSERT_into_reports
+        db.insert_into_reports(data)
 
-        db.execute(INSERT_into_reports, data)
-
-        db.commit()
-        db.close()
         await message.reply("Дякуємо за звіт! 💛")
 
         for admin in SUPER_USERS:
