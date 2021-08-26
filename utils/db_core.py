@@ -1,4 +1,5 @@
 import sqlite3
+from sqlite3.dbapi2 import connect
 from typing import Union
 
 
@@ -11,21 +12,19 @@ class DbCore:
     def connection(self) -> sqlite3:
         return sqlite3.connect(self._path_to_db)
 
-    def execute(self, sql_queries: str, parameters: Union[list, tuple] = (),
-                fetchone=False, fetchall=False, commit=False, via_percent=False) -> list:
+    def execute(self, sql_query: str = "", parameters: Union[list, tuple] = (),
+                fetchone: bool = False, fetchall: bool = False, commit: bool = False) -> list:
 
         if isinstance(parameters, list):
             parameters = tuple(parameters)
 
         connection = self.connection
-        cursor = connection.cursor()
+        query_output = connection.cursor().execute(sql_query, parameters)
 
         if fetchone:
-            return cursor.execute(sql_queries, parameters).fetchone()
+            return query_output.fetchone()
         elif fetchall:
-            return cursor.execute(sql_queries, parameters).fetchall()
-        else:
-            cursor.execute(sql_queries, parameters)
+            return query_output.fetchall()
 
         if commit:
             connection.commit()
@@ -45,13 +44,8 @@ class DbCore:
             luck_timeleft INTEGER                 NOT NULL
         )""" % group_id
 
-        connection = self.connection
-        cursor = connection.cursor()
+        self.execute(query, commit=True)
 
-        cursor.execute(query)
-        connection.commit()
-
-        connection.close()
 
     def create_reports_table(self) -> None:
         query = """
@@ -64,13 +58,8 @@ class DbCore:
                 message     TEXT           NOT NULL
             )
         """
+        self.execute(query, commit=True)
 
-        connection = self.connection
-        cursor = connection.cursor()
-
-        cursor.execute(query)
-        connection.commit()
-        connection.close()
 
     def create_groups_name_table(self) -> None:
         query = """
@@ -79,36 +68,21 @@ class DbCore:
                 group_name  VARCHAR(255) NOT NULL
             )
         """
+        self.execute(query, commit=True)
 
-        connection = self.connection
-        cursor = connection.cursor()
-
-        cursor.execute(query)
-        connection.commit()
-        connection.close()
 
     def insert_into_groups_name(self, parameters: tuple = ()) -> None:
         query = """
             INSERT INTO `groups_name` (group_id, group_name)
             VALUES (?,?)
         """
+        self.execute(query, parameters, commit=True)
 
-        connection = self.connection
-        cursor = connection.cursor()
-
-        cursor.execute(query, parameters)
-
-        connection.commit()
-        connection.close()
 
     def insert_into_reports(self, parameters: tuple = ()) -> None:
         query = """
             INSERT INTO `reports` (group_id, group_name, user_id, username, name, message)
             VALUES (?, ?, ?, ?, ?, ?)
         """
-        connection = self.connection
+        self.execute(query, parameters, commit=True)
 
-        cursor = connection.cursor()
-        cursor.execute(query, parameters)
-        connection.commit()
-        connection.close()
