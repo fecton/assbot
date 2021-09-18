@@ -9,6 +9,30 @@
 </div><hr>
 
 <div>
+    <h2>Configuration</h2>
+    <h3>Typical .env file</h3>
+    <ul>
+        <li>TOKEN=here is your telegram token</li>
+        <li>OWNER=here is owner's telegram id</li>
+    </ul>
+    <h3>Example</h3>
+    <code>
+        TOKEN=1777031958:AAF4O-_GmkvFJvhP7cVlxa697Y48rUPC4Hc
+    </code><br>
+    <code>
+        OWNER=37592934
+    </code><br><br>
+</div>
+<div>
+    <h3>Configuration in config.py</h3>
+    <ul>
+        <li>DB_NAME - database name</li>
+        <li>TOKEN - gets in .env file</li>
+        <li>SUPER_USERS - gets owners id in .env file and you can add other</li>
+    </ul>
+</div>
+
+<div>
     <div align=center>
         <h3>Recommended Python version: Python 3.9.5</h3>
     </div>
