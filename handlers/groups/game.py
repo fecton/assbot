@@ -3,6 +3,7 @@ from loader import dp, db
 from data.long_messages import long_messages
 from data.functions import AssCore
 from filters import IsGroup
+from utils.set_rate_limit import rate_limit
 
 
 @dp.message_handler(IsGroup(), commands="ass")
@@ -64,7 +65,7 @@ async def ass(message: types.Message):
             if int(time()) >= ass_info.endtime:  # if last_time already pasted
                 await message.reply(ass_info.ass_main(message, group_id))
             else:
-                if ass_info.spamcount == 5:  # if spamcount == 5 -> blacklisted
+                if ass_info.spamcount == 4:  # if spamcount == 4 -> blacklisted
                     query = """
                         UPDATE `%d` SET blacklisted=1, length=0 WHERE user_id=%d
                     """ % (group_id, user_id)
@@ -92,7 +93,6 @@ async def is_lucky(message: types.Message):
     query = """
         SELECT luck_timeleft, length, spamcount FROM `%d` WHERE user_id=%d
     """ % (group_id, user_id)
-    # db.execute("SELECT * FROM `%d`" % group_id)
     
     inf = db.execute(query, fetchone=True)
 
@@ -116,7 +116,7 @@ async def is_lucky(message: types.Message):
         from random import randint, choice
 
         # chance of win
-        winrate = 30
+        winrate = 50
         k_win = 2  # 200%
         k_fail = 0.5   # 50%
 
@@ -126,9 +126,8 @@ async def is_lucky(message: types.Message):
             await message.reply(
                 "<b>%s ОТРИМАВ ВИГРАШ!</b> 📈\n\n"
                 "%s Твій приз: %d см\n"
-                "📍 Зараз у тебе: %d см\n\n"
                 "Продовжуй грати через неділю!"
-                % (firstname, choice(LUCK_win_emojis), length * k_win - length, length * k_win))
+                % (firstname, choice(LUCK_win_emojis), length * k_win - length))
             
             length *= k_win
         
@@ -138,9 +137,8 @@ async def is_lucky(message: types.Message):
             await message.reply(
                 "<b>%s ПРОГРАВ!</b>! 📉\n\n"
                 "%s Ти програв: %d см\n"
-                "📍 Зараз у тебе: %d см\n\n"
                 "Продовжуй грати через неділю!"
-                % (firstname, choice(LUCK_fail_emojis), length * k_fail, length - length * k_fail))
+                % (firstname, choice(LUCK_fail_emojis), length * k_fail))
             
             length -= length * k_fail
 
@@ -175,6 +173,7 @@ async def is_lucky(message: types.Message):
 
 
 # a user leaves the game
+@rate_limit(120)
 @dp.message_handler(IsGroup(), commands="leave")
 async def leave(message: types.Message):
     group_id = message.chat.id

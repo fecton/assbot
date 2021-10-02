@@ -70,7 +70,7 @@ class AssCore:
 
             db.execute("""
                 UPDATE `%d` SET spamcount=%d WHERE user_id=%d
-            """ % (group_id, self.spamcount + 1, self.id))
+            """ % (group_id, self.spamcount + 1, self.id), commit=True)
         else:
 
             from random import randint

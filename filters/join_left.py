@@ -25,3 +25,12 @@ class IsLeft(BoundFilter):
         if bot_id == user_id:
             return True
         return False
+
+
+class IsUser(BoundFilter):
+    async def check(self, message: types.Message):
+        if not message.from_user.is_bot:
+            return True
+        return False
+
+

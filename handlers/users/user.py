@@ -2,9 +2,11 @@ from aiogram import types
 from loader import dp, db
 from data.config import SUPER_USERS
 from data.functions import user_input
+from utils.set_rate_limit import rate_limit
 
 
 # REPORT "message"
+@rate_limit(3)
 @dp.message_handler(commands="r")
 async def report(message: types.Message):
     """

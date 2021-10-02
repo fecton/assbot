@@ -2,9 +2,10 @@ from aiogram import Bot, Dispatcher, types
 from utils.db_core import DbCore
 from data.config import TOKEN, DB_NAME
 from os import path
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 bot = Bot(token=TOKEN, parse_mode=types.ParseMode.HTML)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=MemoryStorage())
 db = DbCore()
 
 if not path.exists(DB_NAME):

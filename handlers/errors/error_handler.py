@@ -1,6 +1,8 @@
 from loader import dp
+from utils.set_rate_limit import rate_limit
 
 
+@rate_limit(0)
 @dp.errors_handler()
 async def errors_handler(update, exception):
     from aiogram.utils.exceptions import (Unauthorized, InvalidQueryID, TelegramAPIError,
