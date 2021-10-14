@@ -65,7 +65,7 @@ async def ass(message: types.Message):
             if int(time()) >= ass_info.endtime:  # if last_time already pasted
                 await message.reply(ass_info.ass_main(message, group_id))
             else:
-                if ass_info.spamcount == 4:  # if spamcount == 4 -> blacklisted
+                if ass_info.spamcount == 5:  # if spamcount == 5 -> blacklisted
                     query = """
                         UPDATE `%d` SET blacklisted=1, length=0 WHERE user_id=%d
                     """ % (group_id, user_id)
@@ -161,9 +161,9 @@ async def is_lucky(message: types.Message):
         days_left = ceil(int(luck_timeleft - time()) / 86400)
         # answer with a count of days
         if days_left == 1:
-            await message.reply("⛔️ Неділя ще не пройшла! Залишився 1 день.")
+            await message.reply("Неділя ще не пройшла! Залишився 1 день.")
         else:
-            await message.reply("⛔️ Неділя ще не пройшла! Залишилося %d д." % days_left)
+            await message.reply("Неділя ще не пройшла! Залишилося %d д." % days_left)
         # increment spamcount and write it
         spamcount += 1
         query = """

@@ -19,7 +19,9 @@ class DbCore:
             parameters = tuple(parameters)
 
         connection = self.connection
+
         query_output = connection.cursor().execute(sql_query, parameters)
+
 
         if fetchone:
             return query_output.fetchone()

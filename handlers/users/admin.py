@@ -70,7 +70,7 @@ async def show_blacklisted_users(message: types.Message):
 
         try:
             query = """
-                SELECT * FROM `%d` WHERE blacklisted=1
+                SELECT * FROM `%s` WHERE blacklisted=1
             """ % group_id
             users_data = db.execute(query, fetchall=True)
         except sqlite3.OperationalError:
