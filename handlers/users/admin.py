@@ -104,33 +104,36 @@ async def ban(message: types.Message):
     after that updates user's column "blacklisted" to 1 (user will be banned)
     """
     
-    info = user_input(message, "/ban").split(" ")
-    if len(info) != 2:
-        await message.answer("⛔️ Невірний формат!")
-        return
+    # info = user_input(message, "/ban").split(" ")
+    
+    # if len(info) != 2:
+    #     await message.answer("⛔️ Невірний формат!")
+    #     return
 
-    # select current group
-    if info[0] == "self":
+    # # select current group
+    # if info[0] == "self":
+    #     ban_group = message.chat.id
+    # else:
+    #     ban_group = info[0]
+
+    # # select yourself
+    # if info[1] == "self":
+    #     user_to_ban = message.from_user.id
+    # else:
+    #     user_to_ban = info[1]
+
+    # if info[0] != "self" and info[1] != "self":
+    #     if re.search(r"[A-Za-z]", info[0]) or re.search(r"[A-Za-z]", info[1]):
+    #         await message.answer("⛔️ Невірний формат!")
+    #         return
+
+    # user_to_ban, ban_group = int(user_to_ban), int(ban_group)
+
+    # if not user_to_ban:
+    #     await message.answer("⛔️ Можливо ти щось забув?")
+    if message.reply_to_message is not None:
+        user_to_ban = message.reply_to_message.from_user.id
         ban_group = message.chat.id
-    else:
-        ban_group = info[0]
-
-    # select yourself
-    if info[1] == "self":
-        user_to_ban = message.from_user.id
-    else:
-        user_to_ban = info[1]
-
-    if info[0] != "self" and info[1] != "self":
-        if re.search(r"[A-Za-z]", info[0]) or re.search(r"[A-Za-z]", info[1]):
-            await message.answer("⛔️ Невірний формат!")
-            return
-
-    user_to_ban, ban_group = int(user_to_ban), int(ban_group)
-
-    if not user_to_ban:
-        await message.answer("⛔️ Можливо ти щось забув?")
-    else:
         try:
             # if group exists
             try:
@@ -167,49 +170,53 @@ async def unban(message: types.Message):
     This handler unban user by the argument (set blacklisted to 0)
     """
     
-    info = user_input(message, "/ub").split(" ")
-    if len(info) != 2:
-        await message.answer("⛔️ Невірний формат!")
-        return
+    # info = user_input(message, "/ub").split(" ")
+    # if len(info) != 2:
+    #     await message.answer("⛔️ Невірний формат!")
+    #     return
 
-    # select current group
-    if info[0] == "self" and message.chat.type != "private":
+    # # select current group
+    # if info[0] == "self" and message.chat.type != "private":
+    #     group_id = message.chat.id
+    # else:
+    #     group_id = info[0]
+    #     if re.search(r"[A-Za-z]", group_id):
+    #         await message.answer("⛔️ Невірний формат!")
+    #         return
+    #     group_id = int(group_id)
+
+    # # select yourself
+    # if info[1] == "self":
+    #     user_id = message.from_user.id
+    # else:
+    #     user_id = info[1]
+    #     if re.search(r"[A-Za-z]", user_id):
+    #         await message.answer("⛔️ Невірний формат!")
+    #         return
+    #     user_id = int(user_id)
+
+
+    if message.reply_to_message is not None:
         group_id = message.chat.id
-    else:
-        group_id = info[0]
-        if re.search(r"[A-Za-z]", group_id):
-            await message.answer("⛔️ Невірний формат!")
-            return
-        group_id = int(group_id)
-
-    # select yourself
-    if info[1] == "self":
-        user_id = message.from_user.id
-    else:
-        user_id = info[1]
-        if re.search(r"[A-Za-z]", user_id):
-            await message.answer("⛔️ Невірний формат!")
-            return
-        user_id = int(user_id)
-
-    try:
-        query = """
-            SELECT blacklisted FROM `%d` WHERE user_id=%d
-        """ % (group_id, user_id)
-
-        user_is_blacklisted = db.execute(query, fetchone=True)[0]
-
-        if user_is_blacklisted:
+        user_id = message.reply_to_message.from_user.id
+        try:
             query = """
-                UPDATE `%d` SET blacklisted=0, spamcount=0 WHERE user_id=%d
+                SELECT blacklisted FROM `%d` WHERE user_id=%d
             """ % (group_id, user_id)
-            db.execute(query, commit=True)
-            await message.answer("✅ Користувач може повернутися до гри!")
-        else:
-            await message.answer("❌ Користувач не заблокований!")
 
-    except sqlite3.OperationalError:
-        await message.answer("⛔️ Дана группа не існує!")
+            user_is_blacklisted = db.execute(query, fetchone=True)[0]
+
+            if user_is_blacklisted:
+                query = """
+                    UPDATE `%d` SET blacklisted=0, spamcount=0 WHERE user_id=%d
+                """ % (group_id, user_id)
+                db.execute(query, commit=True)
+                await message.answer("✅ Користувач може повернутися до гри!")
+            else:
+                await message.answer("❌ Користувач не заблокований!")
+
+        except sqlite3.OperationalError:
+            await message.answer("⛔️ Дана группа не існує!")
 
 
 
@@ -297,7 +304,7 @@ async def show_users(message: types.Message):
             query = "SELECT * FROM `%d`" % group_id
             users = db.execute(query, fetchall=True)
             output_message = "👥 Group: <code>%s</code>\n" % group_id
-            output_message += "ID:USERNAME:NAME:SPAM COUNT:IS_BANNED\n\n"
+            output_message += "ID:USERNAME:NAME:LENGTH:SPAM:BANNED\n\n"
 
             user_count = 0
             for user in users:
@@ -308,7 +315,7 @@ async def show_users(message: types.Message):
                 else:
                     blacklisted = "❌"
                 output_message += f" ▶️ <code>{user.id}</code> : <b>{user.username}</b> : <b>{user.name}</b>"\
-                                  f" : {user.spamcount} : {blacklisted}\n"
+                                  f" : {user.length} : {user.spamcount} : {blacklisted}\n"
 
             if user_count == 1:
                 output_message += "\n📌 Totally: 1 user"
