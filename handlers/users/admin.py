@@ -2,12 +2,14 @@ import sqlite3
 import re
 
 from aiogram import types
+from aiogram.dispatcher.storage import FSMContext
 from loader import dp
 
 from data.functions import user_input
 from data.long_messages import long_messages
 from filters import IsAdmin
-from loader import db
+from loader import db, bot
+from states import Ask_Text
 
 
 @dp.message_handler(IsAdmin(), commands="admin")
@@ -16,6 +18,36 @@ async def show_admin_help(message: types.Message):
     Admin help
     """
     await message.answer(long_messages["admin"])
+
+
+
+@dp.message_handler(IsAdmin(), commands="notify", state=None)
+async def get_message_to_notify(message: types.Message):
+    await message.answer("Enter your message")
+    await Ask_Text.no_text.set()
+
+
+@dp.message_handler(IsAdmin(), state=Ask_Text.no_text)
+async def are_you_sure(message: types.Message, state: FSMContext):
+    await state.update_data(text=message.text)
+    await message.answer("Are you sure? y/n")
+    await Ask_Text.with_text.set()
+
+
+@dp.message_handler(IsAdmin(), state=Ask_Text.with_text)
+async def notify_all_groups(message: types.Message, state: FSMContext):
+    text = (await state.get_data())["text"]
+    if message.text in ["y", "yes"]:
+        query = "SELECT * FROM `groups_name`"
+        groups_list = db.execute(query, fetchall=True)
+
+        for group_id in groups_list:
+            await bot.send_message(group_id[0], text)
+    else:
+        await message.answer("Okay, reset all")
+
+    await state.reset_state()
+
 
 
 @dp.message_handler(IsAdmin(), commands="groups")

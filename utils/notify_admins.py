@@ -1,4 +1,4 @@
-import time
+from time import asctime
 from aiogram import Dispatcher
 
 from data.config import SUPER_USERS
@@ -11,7 +11,7 @@ async def on_startup_notify(dp: Dispatcher):
             await dp.bot.send_message(
                 admin, 
                 "Бот '%s' запущен успешно\nВремя запуска: %s" 
-                % (bot_name, time.asctime())
+                % (bot_name, asctime())
             )
         except Exception as err:
             print(err)
