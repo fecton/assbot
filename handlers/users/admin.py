@@ -2,6 +2,7 @@ import sqlite3
 import re
 
 from aiogram import types
+import aiogram
 from aiogram.dispatcher.storage import FSMContext
 from loader import dp
 
@@ -43,7 +44,12 @@ async def notify_all_groups(message: types.Message, state: FSMContext):
         query = "SELECT * FROM `groups_name`"
         groups_list = db.execute(query, fetchall=True)
 
-        for group_id in groups_list: await bot.send_message(group_id[0], text, disable_web_page_preview=False)
+        for group_id in groups_list: 
+            try:
+                await bot.send_message(group_id[0], text, disable_web_page_preview=False)
+            except aiogram.exceptions.Unauthorized:
+                continue
+        await message.answer("Completed!")
     else:
         await message.answer("Okay, reset all")
 
