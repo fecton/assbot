@@ -21,7 +21,7 @@ async def show_admin_help(message: types.Message):
 
 
 
-@dp.message_handler(IsAdmin(), commands="notify", state=None)
+@dp.message_handler(IsAdmin(), commands="notify")
 async def get_message_to_notify(message: types.Message):
     await message.answer("Enter your message")
     await Ask_Text.no_text.set()
@@ -30,6 +30,7 @@ async def get_message_to_notify(message: types.Message):
 @dp.message_handler(IsAdmin(), state=Ask_Text.no_text)
 async def are_you_sure(message: types.Message, state: FSMContext):
     await state.update_data(text=message.text)
+
     await message.answer("Are you sure? y/n")
     await Ask_Text.with_text.set()
 
@@ -37,12 +38,12 @@ async def are_you_sure(message: types.Message, state: FSMContext):
 @dp.message_handler(IsAdmin(), state=Ask_Text.with_text)
 async def notify_all_groups(message: types.Message, state: FSMContext):
     text = (await state.get_data())["text"]
+
     if message.text in ["y", "yes"]:
         query = "SELECT * FROM `groups_name`"
         groups_list = db.execute(query, fetchall=True)
 
-        for group_id in groups_list:
-            await bot.send_message(group_id[0], text)
+        for group_id in groups_list: await bot.send_message(group_id[0], text, disable_web_page_preview=False)
     else:
         await message.answer("Okay, reset all")
 
@@ -136,33 +137,6 @@ async def ban(message: types.Message):
     after that updates user's column "blacklisted" to 1 (user will be banned)
     """
     
-    # info = user_input(message, "/ban").split(" ")
-    
-    # if len(info) != 2:
-    #     await message.answer("⛔️ Невірний формат!")
-    #     return
-
-    # # select current group
-    # if info[0] == "self":
-    #     ban_group = message.chat.id
-    # else:
-    #     ban_group = info[0]
-
-    # # select yourself
-    # if info[1] == "self":
-    #     user_to_ban = message.from_user.id
-    # else:
-    #     user_to_ban = info[1]
-
-    # if info[0] != "self" and info[1] != "self":
-    #     if re.search(r"[A-Za-z]", info[0]) or re.search(r"[A-Za-z]", info[1]):
-    #         await message.answer("⛔️ Невірний формат!")
-    #         return
-
-    # user_to_ban, ban_group = int(user_to_ban), int(ban_group)
-
-    # if not user_to_ban:
-    #     await message.answer("⛔️ Можливо ти щось забув?")
     if message.reply_to_message is not None:
         user_to_ban = message.reply_to_message.from_user.id
         ban_group = message.chat.id
@@ -174,26 +148,50 @@ async def ban(message: types.Message):
                 """ % ban_group
                 db.execute(query, commit=True)
             except sqlite3.OperationalError:
-                await message.answer("⛔️ Не існує такої групи!")
-                return
-
-            query = """
-                SELECT * FROM `%d` WHERE user_id=%d
-            """ % (ban_group, user_to_ban)
-
-            user = db.execute(query, fetchone=True)[0]
-            # if user exists
-            if user:
-                query = """
-                    UPDATE `%d` SET blacklisted=1 WHERE user_id=%d
-                """ % (ban_group, user_to_ban)
-                db.execute(query, commit=True)
-                await message.answer("✅ Користувач отримав по своїй сідничці!")
-            else:
-                await message.answer("⛔️ Користувач має бути зарегестрованим у грі!")
-
+                await message.answer("⛔️ Не існує такої групи!"); return
         except ValueError:
             await message.answer("⛔️ Не знаю таких гравців")
+    else:
+        info = user_input(message, "/ban").split(" ")
+
+        if len(info) != 2:
+            await message.answer("⛔️ Невірний формат!"); return
+
+        # select current group
+        if info[0] == "self":
+            ban_group = message.chat.id
+        else:
+            ban_group = info[0]
+
+        # select yourself
+        if info[1] == "self":
+            user_to_ban = message.from_user.id
+        else:
+            user_to_ban = info[1]
+
+        if info[0] != "self" and info[1] != "self":
+            if re.search(r"[A-Za-z]", info[0]) or re.search(r"[A-Za-z]", info[1]):
+                await message.answer("⛔️ Невірний формат!"); return
+
+        user_to_ban, ban_group = int(user_to_ban), int(ban_group)
+
+        if not user_to_ban:
+            await message.answer("⛔️ Можливо ти щось забув?"); return
+
+    query = """
+        SELECT * FROM `%d` WHERE user_id=%d
+    """ % (ban_group, user_to_ban)
+
+    user = db.execute(query, fetchone=True)[0]
+    # if user exists
+    if user:
+        query = """
+            UPDATE `%d` SET blacklisted=1 WHERE user_id=%d
+        """ % (ban_group, user_to_ban)
+        db.execute(query, commit=True)
+        await message.answer("✅ Користувач отримав по своїй сідничці!")
+    else:
+        await message.answer("⛔️ Користувач має бути зарегестрованим у грі!")
 
 
 @dp.message_handler(IsAdmin(), commands="ub")
@@ -201,55 +199,54 @@ async def unban(message: types.Message):
     """
     This handler unban user by the argument (set blacklisted to 0)
     """
-    
-    # info = user_input(message, "/ub").split(" ")
-    # if len(info) != 2:
-    #     await message.answer("⛔️ Невірний формат!")
-    #     return
-
-    # # select current group
-    # if info[0] == "self" and message.chat.type != "private":
-    #     group_id = message.chat.id
-    # else:
-    #     group_id = info[0]
-    #     if re.search(r"[A-Za-z]", group_id):
-    #         await message.answer("⛔️ Невірний формат!")
-    #         return
-    #     group_id = int(group_id)
-
-    # # select yourself
-    # if info[1] == "self":
-    #     user_id = message.from_user.id
-    # else:
-    #     user_id = info[1]
-    #     if re.search(r"[A-Za-z]", user_id):
-    #         await message.answer("⛔️ Невірний формат!")
-    #         return
-    #     user_id = int(user_id)
-
 
     if message.reply_to_message is not None:
         group_id = message.chat.id
         user_id = message.reply_to_message.from_user.id
-        try:
+    else:
+        info = user_input(message, "/ub").split(" ")
+        if len(info) != 2:
+            await message.answer("⛔️ Невірний формат!")
+            return
+
+        # select current group
+        if info[0] == "self" and message.chat.type != "private":
+            group_id = message.chat.id
+        else:
+            group_id = info[0]
+            if re.search(r"[A-Za-z]", group_id):
+                await message.answer("⛔️ Невірний формат!")
+                return
+            group_id = int(group_id)
+
+        # select yourself
+        if info[1] == "self":
+            user_id = message.from_user.id
+        else:
+            user_id = info[1]
+            if re.search(r"[A-Za-z]", user_id):
+                await message.answer("⛔️ Невірний формат!")
+                return
+            user_id = int(user_id)
+
+    try:
+        query = """
+            SELECT blacklisted FROM `%d` WHERE user_id=%d
+        """ % (group_id, user_id)
+
+        user_is_blacklisted = db.execute(query, fetchone=True)[0]
+
+        if user_is_blacklisted:
             query = """
-                SELECT blacklisted FROM `%d` WHERE user_id=%d
+                UPDATE `%d` SET blacklisted=0, spamcount=0 WHERE user_id=%d
             """ % (group_id, user_id)
+            db.execute(query, commit=True)
+            await message.answer("✅ Користувач може повернутися до гри!")
+        else:
+            await message.answer("❌ Користувач не заблокований!")
 
-            user_is_blacklisted = db.execute(query, fetchone=True)[0]
-
-            if user_is_blacklisted:
-                query = """
-                    UPDATE `%d` SET blacklisted=0, spamcount=0 WHERE user_id=%d
-                """ % (group_id, user_id)
-                db.execute(query, commit=True)
-                await message.answer("✅ Користувач може повернутися до гри!")
-            else:
-                await message.answer("❌ Користувач не заблокований!")
-
-        except sqlite3.OperationalError:
-            await message.answer("⛔️ Дана группа не існує!")
-
+    except sqlite3.OperationalError:
+        await message.answer("⛔️ Дана группа не існує!")
 
 
 # SHOW REPORTS FROM TABLE `reports` in simple form
