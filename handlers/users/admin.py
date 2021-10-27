@@ -49,6 +49,10 @@ async def notify_all_groups(message: types.Message, state: FSMContext):
                 await bot.send_message(group_id[0], text, disable_web_page_preview=False)
             except aiogram.exceptions.Unauthorized:
                 continue
+            except aiogram.exceptions.ChatNotFound:
+                continue
+            except aiogram.exceptions.MigrateToChat as err:
+                await bot.send_message(err.migrate_to_chat_id, text, disable_web_page_preview=False)
         await message.answer("Completed!")
     else:
         await message.answer("Okay, reset all")
