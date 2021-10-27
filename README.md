@@ -109,6 +109,9 @@
             <li>
                 <b>/clear</b> — delete all rows in table `reports`
             </li>
+            <li>
+                <b>/notify</b> — notify all groups by your message
+            </li>
         </ul>
     </div>
 </div>
