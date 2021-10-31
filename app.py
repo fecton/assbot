@@ -10,7 +10,7 @@
 # ------------------------------
 # Enjoy using! ^_^
 
-__version__ = "1.5"
+__version__ = "1.5.2"
 
 from aiogram import Dispatcher
 
