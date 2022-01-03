@@ -16,19 +16,17 @@
         <li>OWNER=here is owner's telegram id</li>
     </ul>
     <h3>Example</h3>
-    <code>
-        TOKEN=1777031958:AAF4O-_GmkvFJvhP7cVlxa697Y48rUPC4Hc
-    </code><br>
-    <code>
-        OWNER=37592934
-    </code><br><br>
+<code>
+TOKEN=1777031958:AAF4O-_GmkvFJvhP7cVlxa697Y48rUPC4Hc
+OWNER=37592934
+</code>
 </div>
 <div>
     <h3>Configuration in config.py</h3>
     <ul>
         <li>DB_NAME - database name</li>
-        <li>TOKEN - gets in .env file</li>
-        <li>SUPER_USERS - gets owners id in .env file and you can add other</li>
+        <li>TOKEN - token which gets in .env file</li>
+        <li>SUPER_USERS - owners id which gets in .env file and you can add other to list</li>
     </ul>
 </div>
 
@@ -115,3 +113,30 @@
         </ul>
     </div>
 </div>
+
+## Screenshots
+
+> Adding bot to the group (it needs for creating a group's table)
+<img src="images_readme/bot_added.png" width=400>
+
+> **/start**
+<img src="images_readme/start.png" width=400>
+
+> **/help**
+<img src="images_readme/help.png" width=400>
+
+> **/ass** (your ass can reduce and icrease by random or stay without changes)
+<img src="images_readme/ass.png" width=400>
+
+> **/luck** (allows after 100cm)
+<img src="images_readme/luck.png" width=400>
+
+> **/statistic**
+<img src="images_readme/statistic.png" width=400>
+
+> **/leave**
+<img src="images_readme/leave.png" width=400>
+
+> **/about**
+<img src="images_readme/about.png" width=400>
+
