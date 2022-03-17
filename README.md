@@ -1,6 +1,6 @@
 <div align=center>
     <img src="data/avatar.jpg" width="100">
-    <h1>AssBot (open-source Ebobot)</h1>
+    <h1>🇺🇦 AssBot (open-source Ebobot)</h1>
 </div>
 
 <div align=center>
