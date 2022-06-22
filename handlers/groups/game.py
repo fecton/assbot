@@ -1,10 +1,15 @@
 from aiogram import types
+from time import time
+from math import ceil
+
 from loader import dp, db
 from data.long_messages import long_messages
 from data.functions import AssCore
 from filters import IsGroup
 from utils.set_rate_limit import rate_limit
 
+from data.emojis import LUCK_win_emojis
+from data.emojis import LUCK_fail_emojis
 
 @dp.message_handler(IsGroup(), commands="ass")
 async def ass(message: types.Message):
@@ -55,7 +60,6 @@ async def ass(message: types.Message):
                     (group_id, username, first_name, user_id)
             db.execute(query, commit=True)
 
-        from time import time
 
         ass_info = AssCore(ass_info)
 
@@ -97,14 +101,14 @@ async def is_lucky(message: types.Message):
     inf = db.execute(query, fetchone=True)
 
     if inf is None:
-        await message.reply("⛔️ Ти не зарегестрований у грі: пиши /ass")
+        await message.reply("Ти не зарегестрований у грі: пиши /ass")
         return
     else:
         luck_timeleft, length, spamcount = inf
 
     # if a user's length is too small
     if length < 100:
-        await message.reply("⛔️ Як підростеш до 100 см, тоді і повертайся")
+        await message.reply("Як підростеш до 100 см, тоді і повертайся")
         return
     
     # check timeleft
@@ -121,8 +125,6 @@ async def is_lucky(message: types.Message):
         k_fail = 0.5   # 50%
 
         if winrate >= randint(1, 100):
-            from data.emojis import LUCK_win_emojis
-
             await message.reply(
                 "<b>%s ОТРИМАВ ВИГРАШ!</b> 📈\n\n"
                 "%s Твій приз: %d см\n"
@@ -132,8 +134,6 @@ async def is_lucky(message: types.Message):
             length *= k_win
         
         else:
-            from data.emojis import LUCK_fail_emojis
-
             await message.reply(
                 "<b>%s ПРОГРАВ!</b>! 📉\n\n"
                 "%s Ти програв: %d см\n"
@@ -156,7 +156,6 @@ async def is_lucky(message: types.Message):
         db.execute(query, commit=True)
 
     else:
-        from math import ceil
         # define time left
         days_left = ceil(int(luck_timeleft - time()) / 86400)
         # answer with a count of days
@@ -186,18 +185,18 @@ async def leave(message: types.Message):
     ass_info = db.execute(query, fetchone=True)
 
     if not ass_info or ass_info is None:
-        await message.answer("⛔️ Ти не зарегестрований у грі!")
+        await message.answer("Ти не зарегестрований у грі!")
         return
 
     ass_info = AssCore(ass_info)
     if ass_info.blacklisted:  # if user is blacklisted
-        await message.reply("⛔️ Ні, дружок, таке не проканає 😏")
+        await message.reply("Ні, дружок, таке не проканає 😏")
     else:  # if user isn't blacklisted
         query = """
             DELETE FROM `%d` WHERE user_id=%d
         """ % (group_id, user_id)
         db.execute(query, commit=True)
-        await message.reply("✅ Ти покинув гру! Шкода такий гарний зад.")
+        await message.reply("Ти покинув гру! Шкода такий гарний зад.")
 
 
 # show statistics of playing user

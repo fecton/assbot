@@ -19,16 +19,16 @@ long_messages = {
              "    /ub group_id user_id — видаляє користувача з бану\n"
              "    /ban group_id user_id — заблокувати користувача\n"
              "    /show group_id — побачити список\n"
-             "    /reports — побачити звіти користувачів\n"
-             "    /dreports — побачити звіти користувачів (повна форма)\n"
+             "    /reports — показати звіти\n"
+             "    /dreports — показати детальні звіти\n"
              "    /groups — побачити усі групи\n"
-             "    /clear — очищує звіти\n"
-             "    /notify — відсилає повідомлення усім группам\n"
+             "    /clear — видалити звіти\n"
+             "    /notify — віправити повідомлення группам\n"
              "----------------------",
     "links": {
         "github": "https://github.com/fecton",
         "telegram_channel": "https://t.me/varlife",
-        "text": "AssBot v1.5 GNU Licence 2021",
+        "text": "AssBot v1.5 GNU Licence 2022",
         },
     "spam": ", я тобі попку збільшую, а ти мені спамиш. "
             "Мені взагалі-то теж не солодко постійно вам попу міряти. "

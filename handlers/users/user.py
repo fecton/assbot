@@ -17,16 +17,21 @@ async def report(message: types.Message):
 
     if len(report_message) < 10:
         if len(report_message.strip()) == 0:
-            await message.reply("⛔️ Ти забув уввести свій звіт!")
+            await message.reply("Ти забув уввести свій звіт!")
         else:
-            await message.reply("⛔️ Звіт дуже малий!")
+            await message.reply("Звіт дуже малий!")
     elif message.text[2] == "@" or "--" in message.text or "#" in message.text:
-        await message.reply("⛔️ Невірний формат!")
+        await message.reply("Невірний формат!")
     else:
 
-        data = [message.chat.id, message.chat.title,
-                message.from_user.id, message.from_user.username,
-                message.from_user.first_name, report_message]
+        data = [
+            message.chat.id, 
+            message.chat.title,
+            message.from_user.id, 
+            message.from_user.username,
+            message.from_user.first_name, 
+            report_message
+        ]
 
         # if it's personal message then message.chat will be marked "Personal message"
 
@@ -40,6 +45,7 @@ async def report(message: types.Message):
         await message.reply("Дякуємо за звіт! 💛")
 
         for admin in SUPER_USERS:
+            # if user doesn't have @username it will sent his name
             if data[3] == "N/A":
                 await dp.bot.send_message(
                     admin,

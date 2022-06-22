@@ -9,5 +9,5 @@ LUCK_fail_emojis = [
 ]
 
 STATISTIC_top_emojis = [
-    "👑", "🥇", "🥈", "🥉", "😈", "👽"
+    "👑", "🥇", "🥈", "🥉", "😈"
 ]

@@ -24,12 +24,20 @@ async def show_admin_help(message: types.Message):
 
 @dp.message_handler(IsAdmin(), commands="notify")
 async def get_message_to_notify(message: types.Message):
+    """
+    The state takes a next user message for notify 
+    """
+    
     await message.answer("Enter your message")
     await Ask_Text.no_text.set()
 
 
 @dp.message_handler(IsAdmin(), state=Ask_Text.no_text)
 async def are_you_sure(message: types.Message, state: FSMContext):
+    """
+    Takes message from previos handler and asks a confirmation
+    """
+    
     await state.update_data(text=message.text)
 
     await message.answer("Are you sure? y/n")
@@ -38,6 +46,10 @@ async def are_you_sure(message: types.Message, state: FSMContext):
 
 @dp.message_handler(IsAdmin(), state=Ask_Text.with_text)
 async def notify_all_groups(message: types.Message, state: FSMContext):
+    """
+    Notify all groups in the database with admin's message
+    """
+
     text = (await state.get_data())["text"]
 
     if message.text in ["y", "yes"]:
@@ -53,9 +65,9 @@ async def notify_all_groups(message: types.Message, state: FSMContext):
                 continue
             except aiogram.exceptions.MigrateToChat as err:
                 await bot.send_message(err.migrate_to_chat_id, text, disable_web_page_preview=False)
-        await message.answer("Completed!")
+        await message.answer("Повідомлення було відправлене группам!")
     else:
-        await message.answer("Okay, reset all")
+        await message.answer("Процедура успішно скасована!")
 
     await state.reset_state()
 
@@ -64,7 +76,7 @@ async def notify_all_groups(message: types.Message, state: FSMContext):
 @dp.message_handler(IsAdmin(), commands="groups")
 async def show_groups(message: types.Message):
     """
-    This function shows all registered in the game groups (its id and its name)
+    This function shows all registered groups (id and its)
     """
     
     query = "SELECT * FROM `groups_name`"
@@ -270,7 +282,7 @@ async def show_reports(message: types.Message):
     users = db.execute(query, fetchall=True)
 
     if users:  # if users exist in group's table
-        output_message = "USERNAME:NAME:MESSAGE\n\n"
+        output_message = "NAME:MESSAGE\n\n"
         for user in users:
             output_message += f"🚩 {user[4]} : {user[5]}\n"
         await message.answer(output_message)
@@ -289,9 +301,9 @@ async def show_detailed_reports(message: types.Message):
     users = db.execute(query, fetchall=True)
 
     if users:  # if users exist in group's table
-        output_message = "USERNAME:NAME:MESSAGE\n\n"
+        output_message = "GRPID:GRPNAME:USERRID:USERNAME:NAME:MESSAGE\n\n"
         for user in users:
-            output_message += f"🚩 {user[0]} : {user[1]} : {user[2]} : {user[3]} : {user[4]} : {user[5]}\n\n"
+            output_message += f"🚩 {user[0]} : {user[1]} : {user[2]} : @{user[3]} : {user[4]} : {user[5]}\n\n"
         await message.answer(output_message)
     else:
         await message.answer("⛔️ Ще нема звітів")
@@ -342,24 +354,24 @@ async def show_users(message: types.Message):
             from data.functions import AssCore
             query = "SELECT * FROM `%d`" % group_id
             users = db.execute(query, fetchall=True)
-            output_message = "👥 Group: <code>%s</code>\n" % group_id
-            output_message += "ID:USERNAME:NAME:LENGTH:SPAM:BANNED\n\n"
+            output_message = "👥 Група: <code>%s</code>\n" % group_id
+            output_message += "ІД:Нікнейм:Ім'я:Довжина:Спам:Можливість грати\n\n"
 
             user_count = 0
             for user in users:
                 user_count += 1
                 user = AssCore(user)
                 if user.blacklisted == 1:  # if blacklisted
-                    blacklisted = "✅"
-                else:
                     blacklisted = "❌"
+                else:
+                    blacklisted = "✅"
                 output_message += f" ▶️ <code>{user.id}</code> : <b>{user.username}</b> : <b>{user.name}</b>"\
                                   f" : {user.length} : {user.spamcount} : {blacklisted}\n"
 
             if user_count == 1:
-                output_message += "\n📌 Totally: 1 user"
+                output_message += "\n📌 Усього: 1 user"
             else:
-                output_message += f"\n📌 Totally: {user_count} users"
+                output_message += f"\n📌 Усього: {user_count} users"
 
             await message.answer(output_message)
         except sqlite3.OperationalError:
