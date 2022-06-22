@@ -46,6 +46,31 @@ OWNER=37592934
     </ul>
 </div><hr>
 
+## Running the bot
+Creating a virtual enviroment
+```
+python3 -m venv venv
+```
+
+Activate venv
+```
+source venv/bin/activate
+```
+
+Installing necessary modules
+```
+pip3 install -r requirements.txt
+```
+
+Run the bot
+```
+python3 app.py
+```
+Deativate venv
+```
+deactivate
+```
+
 <div>
     <div>
         <h3><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F1%2F12%2FUser_icon_2.svg%2F768px-User_icon_2.svg.png&f=1&nofb=1" width="30"> User commands:</h3>
