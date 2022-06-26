@@ -1,15 +1,18 @@
 from aiogram import types
 from time import time
 from math import ceil
+from random import randint, choice
 
 from loader import dp, db
 from data.long_messages import long_messages
 from data.functions import AssCore
 from filters import IsGroup
 from utils.set_rate_limit import rate_limit
+from time import time
 
 from data.emojis import LUCK_win_emojis
 from data.emojis import LUCK_fail_emojis
+from data.emojis import STATISTIC_top_emojis
 
 @dp.message_handler(IsGroup(), commands="ass")
 async def ass(message: types.Message):
@@ -112,12 +115,10 @@ async def is_lucky(message: types.Message):
         return
     
     # check timeleft
-    from time import time
 
     if luck_timeleft < time():
         # if time already passed -> allow play again
         # else deny it
-        from random import randint, choice
 
         # chance of win
         winrate = 50
@@ -217,8 +218,6 @@ async def statistic(message: types.Message):
         return
 
     output_message = "📊 Рейтинг гравців:\n\n"
-
-    from data.emojis import STATISTIC_top_emojis
 
     i = 0
 

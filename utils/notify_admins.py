@@ -9,8 +9,7 @@ async def on_startup_notify(dp: Dispatcher):
         try:
             await dp.bot.send_message(
                 admin, 
-                "Бот '%s' запущен успешно\nВремя запуска: %s" 
-                % (bot_name, asctime())
+                f"Слава Україні! 🇺🇦\nБот '{bot_name}' успішно запущений!\nЧас запуску: {asctime()}" 
             )
         except Exception as err:
             print(err)

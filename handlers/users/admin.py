@@ -28,7 +28,7 @@ async def get_message_to_notify(message: types.Message):
     The state takes a next user message for notify 
     """
     
-    await message.answer("Enter your message")
+    await message.answer("😇 Будь ласка, введіть деяку новину одним повідомленням")
     await Ask_Text.no_text.set()
 
 
@@ -40,7 +40,7 @@ async def are_you_sure(message: types.Message, state: FSMContext):
     
     await state.update_data(text=message.text)
 
-    await message.answer("Are you sure? y/n")
+    await message.answer("Ви впевнені у своєму повідомленні? y/n (так/ні)")
     await Ask_Text.with_text.set()
 
 
@@ -52,7 +52,7 @@ async def notify_all_groups(message: types.Message, state: FSMContext):
 
     text = (await state.get_data())["text"]
 
-    if message.text in ["y", "yes"]:
+    if message.text in ["y", "yes", "так", "т"]:
         query = "SELECT * FROM `groups_name`"
         groups_list = db.execute(query, fetchall=True)
 
@@ -136,7 +136,7 @@ async def show_blacklisted_users(message: types.Message):
             await message.answer("✅ Нема заблокованих користувачів!")
         else:
             output_message = f"👥 Group: <code>{group_id}</code>\n"
-            output_message += "ID : USERNAME : NAME\n\n"
+            output_message += "ІД : Юзернейм : Ім'я гравця\n\n"
 
             users_count = 0
             for user_data in users_data:
@@ -145,10 +145,13 @@ async def show_blacklisted_users(message: types.Message):
                     output_message += f"💢 {user_data[0]} :  {user_data[1]}\n"
                 else:
                     output_message += f"💢 {user_data[0]} :  @{user_data[1]} : {user_data[2]}\n"
+
+            output_message += '\n📌 Усього: '
+
             if users_count == 1:
-                output_message += "\n📌 Totally: 1 user"
+                output_message += "1 гравець"
             else:
-                output_message += "\n📌 Totally: %d users" % users_count
+                output_message += "%d гравців" % users_count
             await message.answer(output_message)
 
 
@@ -368,10 +371,11 @@ async def show_users(message: types.Message):
                 output_message += f" ▶️ <code>{user.id}</code> : <b>{user.username}</b> : <b>{user.name}</b>"\
                                   f" : {user.length} : {user.spamcount} : {blacklisted}\n"
 
+            output_message += "\n📌 Усього: "
             if user_count == 1:
-                output_message += "\n📌 Усього: 1 user"
+                output_message += "1 гравців"
             else:
-                output_message += f"\n📌 Усього: {user_count} users"
+                output_message += f"{user_count} гравців"
 
             await message.answer(output_message)
         except sqlite3.OperationalError:

@@ -46,13 +46,14 @@ async def report(message: types.Message):
 
         for admin in SUPER_USERS:
             # if user doesn't have @username it will sent his name
+            text = "[R] Надісланий звіт від %s, детальніше: /reports, /dreports"
             if data[3] == "N/A":
                 await dp.bot.send_message(
                     admin,
-                    "[R] Надісланий звіт від %s, детальніше: /reports, /dreports" % data[4]
+                    text % data[4]
                 )
             else:
                 await dp.bot.send_message(
                     admin,
-                    "[R] Надісланий звіт від @%s, детальніше: /reports, /dreports" % data[3]
+                    text % data[3]
                 )
