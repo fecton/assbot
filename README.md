@@ -16,11 +16,13 @@
         <li>OWNER=here is owner's telegram id</li>
     </ul>
     <h3>Example</h3>
-<code>
+</div>
+
+```
 TOKEN=1777031958:AAF4O-_GmkvFJvhP7cVlxa697Y48rUPC4Hc
 OWNER=37592934
-</code>
-</div>
+```
+
 <div>
     <h3>Configuration in config.py</h3>
     <ul>
@@ -32,7 +34,7 @@ OWNER=37592934
 
 <div>
     <div align=center>
-        <h3>Recommended Python version: Python 3.9.5</h3>
+        <h3>Recommended Python version: Python 3.10.5</h3>
     </div>
     <div>
         <h3><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn2.iconfinder.com%2Fdata%2Ficons%2Fprogramming-17%2F24%2Fprogramming-module-2-512.png&f=1&nofb=1" width="30"> Modules in use:</h3>
