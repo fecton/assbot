@@ -1,4 +1,4 @@
-from loader import dp
+from loader import dp, logger
 from aiogram import types
 from filters import IsJoined, IsLeft, IsUser
 from utils.db_core import DbCore
@@ -11,12 +11,10 @@ async def bot_joined(message: types.Message):
 
     group_id = message.chat.id
     db = DbCore()
-    # append new table to the database
     db.create_group_table(group_id)
-    # add short info about group in the table `groups_name` for command /groups
     db.insert_into_groups_name((group_id, message.chat.title))
 
-    print("[+] Table with name '%d' (%s) created successfully!" % (group_id, message.chat.title))
+    logger.info("[+] Table with name '%d' (%s) created successfully!" % (group_id, message.chat.title))
 
 
 @rate_limit(0)
@@ -38,4 +36,4 @@ async def bot_left(message: types.Message):
     db.execute("DROP TABLE `%d`" % chat_id)
     db.execute("DELETE FROM `groups_name` WHERE group_id=%d" % chat_id, commit=True)
 
-    print("[+] The group %d has deleted!" % chat_id)
+    logger.info("[+] The group %d has deleted!" % chat_id)
