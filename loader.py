@@ -17,8 +17,6 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 db = DbCore()
 
 if not path.exists(DB_NAME):
-    # it created database if it doesn't exist + create tables
-
     logger.info('First start!')
 
     db.create_reports_table()

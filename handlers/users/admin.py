@@ -4,9 +4,9 @@ import re
 from aiogram import types
 import aiogram
 from aiogram.dispatcher.storage import FSMContext
-from loader import dp
+from loader import dp, logger
 
-from data.functions import user_input
+from data.functions import AssCore, user_input
 from data.long_messages import long_messages
 from filters import IsAdmin
 from loader import db, bot
@@ -67,7 +67,7 @@ async def notify_all_groups(message: types.Message, state: FSMContext):
                 await bot.send_message(err.migrate_to_chat_id, text, disable_web_page_preview=False)
         await message.answer("Повідомлення було відправлене группам!")
     else:
-        await message.answer("Процедура успішно скасована!")
+        await message.answer("Процедура скасована!")
 
     await state.reset_state()
 
@@ -83,7 +83,7 @@ async def show_groups(message: types.Message):
     try:
         groups_info = db.execute(query, fetchall=True)
     except sqlite3.OperationalError:
-        print("[!] The table `groups_name` doesn't exist or was deleted, created new one")
+        logger.debug("[!] The table `groups_name` doesn't exist or was deleted, created new one")
 
         db.create_groups_name_table()
         db.insert_into_groups_name((message.chat.id, message.chat.title))
@@ -306,13 +306,15 @@ async def show_detailed_reports(message: types.Message):
     if users:  # if users exist in group's table
         output_message = "GRPID:GRPNAME:USERRID:USERNAME:NAME:MESSAGE\n\n"
         for user in users:
-            output_message += f"🚩 {user[0]} : {user[1]} : {user[2]} : @{user[3]} : {user[4]} : {user[5]}\n\n"
+            if user[0] == user[2]:
+                output_message += f"🚩 {user[0]} : {user[1]} : @{user[3]} : {user[4]} : {user[5]}\n\n"
+            else:
+                output_message += f"🚩 {user[0]} : {user[1]} : {user[2]} : @{user[3]} : {user[4]} : {user[5]}\n\n"
         await message.answer(output_message)
     else:
         await message.answer("⛔️ Ще нема звітів")
 
 
-# CLEAR ALL REPORTS FROM TABLE `reports`
 @dp.message_handler(IsAdmin(), commands="clear")
 async def clear_reports(message: types.Message):
     """
@@ -354,7 +356,6 @@ async def show_users(message: types.Message):
 
         # (user_id, username, firstname, length, endtime, spamcount, blacklisted)
         try:
-            from data.functions import AssCore
             query = "SELECT * FROM `%d`" % group_id
             users = db.execute(query, fetchall=True)
             output_message = "👥 Група: <code>%s</code>\n" % group_id
@@ -368,12 +369,12 @@ async def show_users(message: types.Message):
                     blacklisted = "❌"
                 else:
                     blacklisted = "✅"
-                output_message += f" ▶️ <code>{user.id}</code> : <b>{user.username}</b> : <b>{user.name}</b>"\
+                output_message += f" ▶️ <code>{user.id}</code> : <b>@{user.username}</b> : <b>{user.name}</b>"\
                                   f" : {user.length} : {user.spamcount} : {blacklisted}\n"
 
             output_message += "\n📌 Усього: "
             if user_count == 1:
-                output_message += "1 гравців"
+                output_message += "1 гравець"
             else:
                 output_message += f"{user_count} гравців"
 
