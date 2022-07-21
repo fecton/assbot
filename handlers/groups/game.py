@@ -67,7 +67,7 @@ async def ass(message: types.Message):
         ass_info = AssCore(ass_info)
 
         if ass_info.blacklisted:  # if already blacklisted
-            await message.reply("💢 %s, дружок, ти вже награвся, шуруй звідси." % first_name)
+            await message.reply("💢 %s, дружок, ти вже награвся, шуруй звідси" % first_name)
         else:  # if not blacklisted
             if int(time()) >= ass_info.endtime:  # if last_time already pasted
                 await message.reply(ass_info.ass_main(message, group_id))
@@ -90,7 +90,6 @@ async def is_lucky(message: types.Message):
     If user wins, user will get 200% of its length
     If user fails, user will last 60% of its length
     """
-    # basic information
     
     group_id = message.chat.id
     user_id = message.from_user.id
@@ -110,18 +109,18 @@ async def is_lucky(message: types.Message):
         luck_timeleft, length, spamcount = inf
 
     # if a user's length is too small
+    
     if length < 100:
         await message.reply("Як підростеш до 100 см, тоді і повертайся")
         return
     
     # check timeleft
-
     if luck_timeleft < time():
         # if time already passed -> allow play again
         # else deny it
 
         # chance of win
-        winrate = 50
+        winrate = 45
         k_win = 2  # 200%
         k_fail = 0.5   # 50%
 
@@ -160,10 +159,11 @@ async def is_lucky(message: types.Message):
         # define time left
         days_left = ceil(int(luck_timeleft - time()) / 86400)
         # answer with a count of days
-        if days_left == 1:
-            await message.reply("Неділя ще не пройшла! Залишився 1 день.")
-        else:
-            await message.reply("Неділя ще не пройшла! Залишилося %d д." % days_left)
+
+        output_message = "Козаче, тиждень ще не пройшов! Спробуй через " + f"{'1 день' if days_left == 1 else f'{days_left} дні'}"
+    
+        await message.reply(output_message)
+
         # increment spamcount and write it
         spamcount += 1
         query = """
@@ -197,7 +197,7 @@ async def leave(message: types.Message):
             DELETE FROM `%d` WHERE user_id=%d
         """ % (group_id, user_id)
         db.execute(query, commit=True)
-        await message.reply("Ти покинув гру! Шкода такий гарний зад.")
+        await message.reply("Ти покинув гру! Шкода такий гарний зад")
 
 
 # show statistics of playing user
