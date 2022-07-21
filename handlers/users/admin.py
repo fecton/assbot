@@ -369,8 +369,13 @@ async def show_users(message: types.Message):
                     blacklisted = "❌"
                 else:
                     blacklisted = "✅"
-                output_message += f" ▶️ <code>{user.id}</code> : <b>@{user.username}</b> : <b>{user.name}</b>"\
-                                  f" : {user.length} : {user.spamcount} : {blacklisted}\n"
+                
+                if(user.username == "None"):
+                    output_message += f" ▶️ <code>{user.id}</code> : <b>Відсутній</b> : <b>{user.name}</b>"
+                else:
+                    output_message += f" ▶️ <code>{user.id}</code> : <b>@{user.username}</b> : <b>{user.name}</b>"
+
+                output_message += f" : {user.length} : {user.spamcount} : {blacklisted}\n"
 
             output_message += "\n📌 Усього: "
             if user_count == 1:
