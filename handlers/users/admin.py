@@ -149,7 +149,7 @@ async def show_blacklisted_users(message: types.Message):
             t = "✅ Нема заблокованих користувачів!"
             await message.answer(esc(t))
         else:
-            output_message = f"👥 Group: <code>{group_id}</code>\n"
+            output_message = f"{'👥 Group:' + code(group_id)}\n"
             output_message += "ІД : Юзернейм : Ім'я гравця\n\n"
 
             users_count = 0
@@ -391,7 +391,7 @@ async def show_users(message: types.Message):
         try:
             query = "SELECT * FROM `%d`" % group_id
             users = db.execute(query, fetchall=True)
-            output_message = f"👥 Група: {code(groupd_id)}\n"
+            output_message = f"👥 Група: {code(group_id)}\n"
             output_message += "ІД:Нікнейм:Ім'я:Довжина:Спам:Можливість грати\n\n"
 
             user_count = 0
