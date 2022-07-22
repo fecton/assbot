@@ -42,11 +42,11 @@ async def are_you_sure(message: types.Message, state: FSMContext):
     Takes message from previos handler and asks a confirmation
     """
     
-    await state.update_data(text=message.text)
+    await state.update_data(text=esc(message.text))
 
     t = "Ви впевнені у своєму повідомленні? y/n (так/ні)"
 
-    await message.answer(t)
+    await message.answer(esc(t))
     await Ask_Text.with_text.set()
 
 
@@ -404,7 +404,7 @@ async def show_users(message: types.Message):
                     blacklisted = "✅"
                 
                 if(user.username == "None"):
-                    output_message += f" ▶️ {code(user.id)} : {bold(Відсутній)} : {bold(user.name)}"
+                    output_message += f" ▶️ {code(user.id)} : {bold('Відсутній')} : {bold(user.name)}"
                 else:
                     output_message += f" ▶️ {code(user.id)} : {bold('@'+user.username)} : {bold(user.name)}"
 
