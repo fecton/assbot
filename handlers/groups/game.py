@@ -9,11 +9,14 @@ from data.functions import AssCore
 from filters import IsGroup
 from utils.set_rate_limit import rate_limit
 from time import time
+from data.config import USER_RATE_LIMIT
 
 from data.emojis import LUCK_win_emojis
 from data.emojis import LUCK_fail_emojis
 from data.emojis import STATISTIC_top_emojis
 
+
+@rate_limit(USER_RATE_LIMIT*2)
 @dp.message_handler(IsGroup(), commands="ass")
 async def ass(message: types.Message):
     """
@@ -83,6 +86,7 @@ async def ass(message: types.Message):
                     await message.reply(ass_info.ass_main(message, group_id))
 
 
+@rate_limit(USER_RATE_LIMIT*10)
 @dp.message_handler(IsGroup(), commands="luck")
 async def is_lucky(message: types.Message):
     """
@@ -111,7 +115,7 @@ async def is_lucky(message: types.Message):
     # if a user's length is too small
     
     if length < 100:
-        await message.reply("Як підростеш до 100 см, тоді і повертайся")
+        await message.reply("Дружок, твоя дупця ще не достатньо величезна ✌️, повертайся після 100 см")
         return
     
     # check timeleft
@@ -173,7 +177,7 @@ async def is_lucky(message: types.Message):
 
 
 # a user leaves the game
-@rate_limit(120)
+@rate_limit(USER_RATE_LIMIT*2)
 @dp.message_handler(IsGroup(), commands="leave")
 async def leave(message: types.Message):
     group_id = message.chat.id
@@ -201,6 +205,7 @@ async def leave(message: types.Message):
 
 
 # show statistics of playing user
+@rate_limit(USER_RATE_LIMIT*2)
 @dp.message_handler(IsGroup(), commands="statistic")
 async def statistic(message: types.Message):
     """
