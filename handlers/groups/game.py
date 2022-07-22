@@ -1,4 +1,6 @@
 from aiogram import types
+from aiogram.utils.markdown import bold, italic, code
+from aiogram.utils.markdown import escape_md as esc
 from time import time
 from math import ceil
 from random import randint, choice
@@ -49,9 +51,9 @@ async def ass(message: types.Message):
         args = (user_id, username, first_name, 0, 0, 0, 0, 0)
         db.execute(query, args, commit=True)
 
-        await message.reply(
-            "👋 Вітаю в нашій когорті, хлопче/дівчино!\n"
-            + ass_info.ass_main(message, group_id))
+        t = "👋 Вітаю в нашій когорті, хлопче/дівчино!\n" + ass_info.ass_main(message, group_id)
+
+        await message.reply(esc(t))
     else:
         ass_info = list(ass_info)
         if ass_info[1] != username or ass_info[2] != first_name:
@@ -70,10 +72,11 @@ async def ass(message: types.Message):
         ass_info = AssCore(ass_info)
 
         if ass_info.blacklisted:  # if already blacklisted
-            await message.reply("💢 %s, дружок, ти вже награвся, шуруй звідси" % first_name)
+            t = "💢 %s, дружок, ти вже награвся, шуруй звідси" % first_name
+            await message.reply(esc(t))
         else:  # if not blacklisted
             if int(time()) >= ass_info.endtime:  # if last_time already pasted
-                await message.reply(ass_info.ass_main(message, group_id))
+                await message.reply(esc(ass_info.ass_main(message, group_id)))
             else:
                 if ass_info.spamcount == 5:  # if spamcount == 5 -> blacklisted
                     query = """
@@ -81,9 +84,11 @@ async def ass(message: types.Message):
                     """ % (group_id, user_id)
                     db.execute(query, commit=True)
 
-                    await message.reply(first_name + long_messages["spam"])
+                    t = first_name + long_messages["spam"]
+                    await message.reply(esc(t))
                 else:
-                    await message.reply(ass_info.ass_main(message, group_id))
+                    t = ass_info.ass_main(message, group_id)
+                    await message.reply(esc(t))
 
 
 @rate_limit(USER_RATE_LIMIT*10)
@@ -107,7 +112,8 @@ async def is_lucky(message: types.Message):
     inf = db.execute(query, fetchone=True)
 
     if inf is None:
-        await message.reply("Ти не зарегестрований у грі: пиши /ass")
+        t = "Ти не зарегестрований у грі: пиши /ass"
+        await message.reply(esc(t))
         return
     else:
         luck_timeleft, length, spamcount = inf
@@ -115,7 +121,8 @@ async def is_lucky(message: types.Message):
     # if a user's length is too small
     
     if length < 100:
-        await message.reply("Дружок, твоя дупця ще не достатньо величезна ✌️, повертайся після 100 см")
+        t = "Дружок, твоя дупця ще не достатньо величезна ✌️, повертайся після 100 см"
+        await message.reply(esc(t))
         return
     
     # check timeleft
@@ -129,20 +136,21 @@ async def is_lucky(message: types.Message):
         k_fail = 0.5   # 50%
 
         if winrate >= randint(1, 100):
-            await message.reply(
-                "<b>%s ОТРИМАВ ВИГРАШ!</b> 📈\n\n"
-                "%s Твій приз: %d см\n"
-                "Продовжуй грати через неділю!"
-                % (firstname, choice(LUCK_win_emojis), length * k_win - length))
+            t = (f"{bold(firstname + ' ОТРИМАВ ВИГРАШ!')} 📈\n\n" + 
+                esc("%s Твій приз: %d см\n" % (choice(LUCK_win_emojis), length * k_win - length)) +
+                esc("Продовжуй грати через неділю!")
+                )
+
+            await message.reply(t)
             
             length *= k_win
-        
         else:
-            await message.reply(
-                "<b>%s ПРОГРАВ!</b>! 📉\n\n"
-                "%s Ти програв: %d см\n"
-                "Продовжуй грати через неділю!"
-                % (firstname, choice(LUCK_fail_emojis), length * k_fail))
+            t = (f"{bold(firstname + ' ПРОГРАВ!')} 📉\n\n" +
+                esc("%s Ти програв: %d см\n" % (choice(LUCK_fail_emojis), length * k_fail)) +
+                esc("Продовжуй грати через неділю!")
+                )
+
+            await message.reply(t)
             
             length -= length * k_fail
 
@@ -166,7 +174,7 @@ async def is_lucky(message: types.Message):
 
         output_message = "Козаче, тиждень ще не пройшов! Спробуй через " + f"{'1 день' if days_left == 1 else f'{days_left} дні'}"
     
-        await message.reply(output_message)
+        await message.reply(esc(output_message))
 
         # increment spamcount and write it
         spamcount += 1
@@ -190,18 +198,22 @@ async def leave(message: types.Message):
     ass_info = db.execute(query, fetchone=True)
 
     if not ass_info or ass_info is None:
-        await message.answer("Ти не зарегестрований у грі!")
+        t = "Ти не зарегестрований у грі!"
+        await message.answer(esc(t))
         return
 
     ass_info = AssCore(ass_info)
     if ass_info.blacklisted:  # if user is blacklisted
-        await message.reply("Ні, дружок, таке не проканає 😏")
+        t = "Ні, дружок, таке не проканає 😏"
+        await message.reply(esc(t))
     else:  # if user isn't blacklisted
         query = """
             DELETE FROM `%d` WHERE user_id=%d
         """ % (group_id, user_id)
         db.execute(query, commit=True)
-        await message.reply("Ти покинув гру! Шкода такий гарний зад")
+        t = "Ти покинув гру! Шкода такий гарний зад"
+
+        await message.reply(esc(t))
 
 
 # show statistics of playing user
@@ -219,7 +231,8 @@ async def statistic(message: types.Message):
     users_data = db.execute(query, fetchall=True)
     
     if not users_data:
-        await message.reply("⛔️ Нема гравців! Стань першим!")
+        t = "⛔️ Нема гравців! Стань першим!"
+        await message.reply(esc(t))
         return
 
     output_message = "📊 Рейтинг гравців:\n\n"
@@ -257,4 +270,4 @@ async def statistic(message: types.Message):
                 output_message += "{0}. {1} — {2} см\n".format(i, user_data.name, user_data.length)
         i += 1
 
-    await message.reply(output_message)
+    await message.reply(esc(output_message))

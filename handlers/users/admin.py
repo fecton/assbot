@@ -1,9 +1,12 @@
 import sqlite3
 import re
 
-from aiogram import types
 import aiogram
+
+from aiogram import types
 from aiogram.dispatcher.storage import FSMContext
+from aiogram.utils.markdown import bold, italic, code
+from aiogram.utils.markdown import escape_md as esc
 from loader import dp, logger
 
 from data.functions import AssCore, user_input
@@ -18,7 +21,7 @@ async def show_admin_help(message: types.Message):
     """
     Admin help
     """
-    await message.answer(long_messages["admin"])
+    await message.answer(esc(long_messages["admin"]))
 
 
 
@@ -28,7 +31,8 @@ async def get_message_to_notify(message: types.Message):
     The state takes a next user message for notify 
     """
     
-    await message.answer("😇 Будь ласка, введіть деяку новину одним повідомленням")
+    t = "😇 Будь ласка, введіть деяку новину одним повідомленням"
+    await message.answer(t)
     await Ask_Text.no_text.set()
 
 
@@ -40,7 +44,9 @@ async def are_you_sure(message: types.Message, state: FSMContext):
     
     await state.update_data(text=message.text)
 
-    await message.answer("Ви впевнені у своєму повідомленні? y/n (так/ні)")
+    t = "Ви впевнені у своєму повідомленні? y/n (так/ні)"
+
+    await message.answer(t)
     await Ask_Text.with_text.set()
 
 
@@ -65,9 +71,12 @@ async def notify_all_groups(message: types.Message, state: FSMContext):
                 continue
             except aiogram.exceptions.MigrateToChat as err:
                 await bot.send_message(err.migrate_to_chat_id, text, disable_web_page_preview=False)
-        await message.answer("Повідомлення було відправлене группам!")
+
+        t = "Повідомлення було відправлене группам!"
     else:
-        await message.answer("Процедура скасована!")
+        t = "Процедура скасована!"
+
+    await message.answer(esc(t))
 
     await state.reset_state()
 
@@ -95,14 +104,15 @@ async def show_groups(message: types.Message):
     for group in groups_info:
         groups_dict[group[0]] = group[1]
 
-    output_message = "✅ <i><b>TABLES</b></i>\n" + "-" * 16 + "\n"
+    output_message = f"✅ {bold('TABLES')}\n" + esc("-") * 16 + "\n"
     if len(groups_dict.keys()) != 0:
         for key in groups_dict.keys():
-            output_message += "<code>%s</code>" % str(key) + " : " + groups_dict[key] + "\n"
-        output_message += "-" * 16
+            output_message += f"{code(str(key))}" + " : " + esc(groups_dict[key]) + "\n"
+        output_message += esc("-") * 16
         await message.answer(output_message)
     else:
-        await message.answer("⛔️ Ще нема груп!")
+        t = "⛔️ Ще нема груп!"
+        await message.answer(esc(t))
 
 
 @dp.message_handler(IsAdmin(), commands="bl")
@@ -114,13 +124,15 @@ async def show_blacklisted_users(message: types.Message):
     group_id = user_input(message, "/bl")
 
     if group_id == "":
-        await message.answer("⛔️ Ти забув ввести ID группи!")
+        t = "⛔️ Ти забув ввести ID группи!"
+        await message.answer(esc(t))
     else:
         if group_id == "self":
             group_id = message.chat.id
         else:
             if re.search(r"[A-Za-z]", group_id):
-                await message.answer("⛔️ Вибач, але не знаю такої групи.")
+                t = "⛔️ Вибач, але не знаю такої групи."
+                await message.answer(esc(t))
                 return
 
         try:
@@ -129,11 +141,13 @@ async def show_blacklisted_users(message: types.Message):
             """ % group_id
             users_data = db.execute(query, fetchall=True)
         except sqlite3.OperationalError:
-            await message.answer("⛔️ Вибач, але не знаю такої групи.")
+            t = "⛔️ Вибач, але не знаю такої групи."
+            await message.answer(esc(t))
             return
 
         if not users_data:
-            await message.answer("✅ Нема заблокованих користувачів!")
+            t = "✅ Нема заблокованих користувачів!"
+            await message.answer(esc(t))
         else:
             output_message = f"👥 Group: <code>{group_id}</code>\n"
             output_message += "ІД : Юзернейм : Ім'я гравця\n\n"
@@ -173,14 +187,18 @@ async def ban(message: types.Message):
                 """ % ban_group
                 db.execute(query, commit=True)
             except sqlite3.OperationalError:
-                await message.answer("⛔️ Не існує такої групи!"); return
+                t = "⛔️ Не існує такої групи!"
+                await message.answer(esc(t))
+                return
         except ValueError:
-            await message.answer("⛔️ Не знаю таких гравців")
+            t = "⛔️ Не знаю таких гравців"
+            await message.answer(esc(t))
     else:
         info = user_input(message, "/ban").split(" ")
 
         if len(info) != 2:
-            await message.answer("⛔️ Невірний формат!"); return
+            t = "⛔️ Невірний формат!"
+            await message.answer(esc(t)); return
 
         # select current group
         if info[0] == "self":
@@ -196,12 +214,16 @@ async def ban(message: types.Message):
 
         if info[0] != "self" and info[1] != "self":
             if re.search(r"[A-Za-z]", info[0]) or re.search(r"[A-Za-z]", info[1]):
-                await message.answer("⛔️ Невірний формат!"); return
+                t = "⛔️ Невірний формат!"
+                await message.answer(esc(t))
+                return
 
         user_to_ban, ban_group = int(user_to_ban), int(ban_group)
 
         if not user_to_ban:
-            await message.answer("⛔️ Можливо ти щось забув?"); return
+            t = "⛔️ Можливо ти щось забув?"
+            await message.answer(t)
+            return
 
     query = """
         SELECT * FROM `%d` WHERE user_id=%d
@@ -214,10 +236,11 @@ async def ban(message: types.Message):
             UPDATE `%d` SET blacklisted=1 WHERE user_id=%d
         """ % (ban_group, user_to_ban)
         db.execute(query, commit=True)
-        await message.answer("✅ Користувач отримав по своїй сідничці!")
+        t = "✅ Користувач отримав по своїй сідничці!"
     else:
-        await message.answer("⛔️ Користувач має бути зарегестрованим у грі!")
+        t = "⛔️ Користувач має бути зарегестрованим у грі!"
 
+    await message.answer(esc(t))
 
 @dp.message_handler(IsAdmin(), commands="ub")
 async def unban(message: types.Message):
@@ -231,7 +254,8 @@ async def unban(message: types.Message):
     else:
         info = user_input(message, "/ub").split(" ")
         if len(info) != 2:
-            await message.answer("⛔️ Невірний формат!")
+            t = "⛔️ Невірний формат!"
+            await message.answer(t)
             return
 
         # select current group
@@ -240,7 +264,8 @@ async def unban(message: types.Message):
         else:
             group_id = info[0]
             if re.search(r"[A-Za-z]", group_id):
-                await message.answer("⛔️ Невірний формат!")
+                t = "⛔️ Невірний формат!"
+                await message.answer(t)
                 return
             group_id = int(group_id)
 
@@ -250,7 +275,8 @@ async def unban(message: types.Message):
         else:
             user_id = info[1]
             if re.search(r"[A-Za-z]", user_id):
-                await message.answer("⛔️ Невірний формат!")
+                t = "⛔️ Невірний формат!"
+                await message.answer(t)
                 return
             user_id = int(user_id)
 
@@ -266,12 +292,14 @@ async def unban(message: types.Message):
                 UPDATE `%d` SET blacklisted=0, spamcount=0 WHERE user_id=%d
             """ % (group_id, user_id)
             db.execute(query, commit=True)
-            await message.answer("✅ Користувач може повернутися до гри!")
+            t = "✅ Користувач може повернутися до гри!"
         else:
-            await message.answer("❌ Користувач не заблокований!")
+            t = "❌ Користувач не заблокований!"
+        await message.answer(esc(t))
 
     except sqlite3.OperationalError:
-        await message.answer("⛔️ Дана группа не існує!")
+        t = "⛔️ Дана группа не існує!"
+        await message.answer(esc(t))
 
 
 # SHOW REPORTS FROM TABLE `reports` in simple form
@@ -288,9 +316,10 @@ async def show_reports(message: types.Message):
         output_message = "NAME:MESSAGE\n\n"
         for user in users:
             output_message += f"🚩 {user[4]} : {user[5]}\n"
-        await message.answer(output_message)
+        await message.answer(esc(output_message))
     else:
-        await message.answer("⛔️ Ще нема звітів")
+        t = "⛔️ Ще нема звітів"
+        await message.answer(t)
 
 
 # SHOW REPORTS FROM TABLE `reports` in detailed form
@@ -310,9 +339,10 @@ async def show_detailed_reports(message: types.Message):
                 output_message += f"🚩 {user[0]} : {user[1]} : @{user[3]} : {user[4]} : {user[5]}\n\n"
             else:
                 output_message += f"🚩 {user[0]} : {user[1]} : {user[2]} : @{user[3]} : {user[4]} : {user[5]}\n\n"
-        await message.answer(output_message)
+        await message.answer(esc(output_message))
     else:
-        await message.answer("⛔️ Ще нема звітів")
+        t = "⛔️ Ще нема звітів"
+        await message.answer(esc(t))
 
 
 @dp.message_handler(IsAdmin(), commands="clear")
@@ -330,9 +360,11 @@ async def clear_reports(message: types.Message):
         """
         db.execute(query, commit=True)
 
-        await message.answer("✅ Звіти повністю очищені!")
+        t = "✅ Звіти повністю очищені!" 
     else:
-        await message.answer("⛔️ Навіщо мені очищати пусту скриньку?")
+        t = "⛔️ Навіщо мені очищати пусту скриньку?"
+
+    await message.answer(esc(t))
 
 
 @dp.message_handler(IsAdmin(), commands="show")
@@ -348,7 +380,8 @@ async def show_users(message: types.Message):
         group_id = message.chat.id
     else:
         if re.search(r"[A-Za-z]", group_id) or not group_id:
-            await message.answer("⛔️ Невірний формат!")
+            t = "⛔️ Невірний формат!"
+            await message.answer(esc(t))
             return
         group_id = int(group_id)
 
@@ -358,7 +391,7 @@ async def show_users(message: types.Message):
         try:
             query = "SELECT * FROM `%d`" % group_id
             users = db.execute(query, fetchall=True)
-            output_message = "👥 Група: <code>%s</code>\n" % group_id
+            output_message = f"👥 Група: {code(groupd_id)}\n"
             output_message += "ІД:Нікнейм:Ім'я:Довжина:Спам:Можливість грати\n\n"
 
             user_count = 0
@@ -371,9 +404,9 @@ async def show_users(message: types.Message):
                     blacklisted = "✅"
                 
                 if(user.username == "None"):
-                    output_message += f" ▶️ <code>{user.id}</code> : <b>Відсутній</b> : <b>{user.name}</b>"
+                    output_message += f" ▶️ {code(user.id)} : {bold(Відсутній)} : {bold(user.name)}"
                 else:
-                    output_message += f" ▶️ <code>{user.id}</code> : <b>@{user.username}</b> : <b>{user.name}</b>"
+                    output_message += f" ▶️ {code(user.id)} : {bold('@'+user.username)} : {bold(user.name)}"
 
                 output_message += f" : {user.length} : {user.spamcount} : {blacklisted}\n"
 
@@ -385,6 +418,8 @@ async def show_users(message: types.Message):
 
             await message.answer(output_message)
         except sqlite3.OperationalError:
-            await message.answer("⛔️ Такої групи не існує")
+            t = "⛔️ Такої групи не існує"
+            await message.answer(t)
     else:
-        await message.answer("⛔️ Ти забув про ідентифікатор групи!")
+        t = "⛔️ Ти забув про ідентифікатор групи!"
+        await message.answer(t)
