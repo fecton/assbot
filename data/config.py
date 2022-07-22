@@ -1,6 +1,8 @@
 from os import getenv
 from dotenv import load_dotenv
 
+USER_RATE_LIMIT = 60
+
 # Loading local .env file
 load_dotenv()  
 

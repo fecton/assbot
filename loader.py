@@ -12,7 +12,7 @@ from os import path
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger('assbot_logger')
 
-bot = Bot(token=TOKEN, parse_mode=types.ParseMode.HTML)
+bot = Bot(token=TOKEN, parse_mode=types.ParseMode.MARKDOWN_V2)
 dp = Dispatcher(bot, storage=MemoryStorage())
 db = DbCore()
 
