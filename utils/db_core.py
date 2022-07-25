@@ -1,6 +1,7 @@
 import sqlite3
 from sqlite3.dbapi2 import connect
 from typing import Union
+from data.structures import ReportStructure
 
 
 class DbCore:
@@ -81,10 +82,11 @@ class DbCore:
         self.execute(query, parameters, commit=True)
 
 
-    def insert_into_reports(self, parameters: tuple = ()) -> None:
-        query = """
-            INSERT INTO `reports` (group_id, group_name, user_id, username, name, message)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """
-        self.execute(query, parameters, commit=True)
+    def insert_into_reports(self, rd: ReportStructure) -> None:
+        assert type(rd) == ReportStructure
+
+        query = "INSERT INTO `reports` (group_id, group_name, user_id, username, name, message) "
+        query += f"VALUES ({rd.chat_id}, \"{rd.chat_title}\", {rd.user_id}, \"{rd.user_name}\", \"{rd.user_firstname}\", \"{rd.message}\")"
+        self.execute(query, commit=True)
+
 

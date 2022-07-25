@@ -4,6 +4,7 @@ from utils.db_core import DbCore
 from time import time
 from random import randint
 
+
 class AssCore:
     """
     Used for better understanding ass_info

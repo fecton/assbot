@@ -92,7 +92,7 @@ async def ass(message: types.Message):
                 else:
                     t = ass_info.ass_main(message, group_id)
 
-            await message.reply(esc(t)
+                await message.reply(esc(t))
 
 
 @rate_limit(USER_RATE_LIMIT*10)

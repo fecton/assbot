@@ -313,7 +313,7 @@ async def show_reports(message: types.Message):
         await message.answer(esc(output_message))
     else:
         t = "⛔️ Ще нема звітів"
-        await message.answer(t)
+        await message.answer(esc(t))
 
 
 # SHOW REPORTS FROM TABLE `reports` in detailed form
