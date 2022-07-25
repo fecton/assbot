@@ -17,7 +17,6 @@ from data.emojis import LUCK_win_emojis
 from data.emojis import LUCK_fail_emojis
 from data.emojis import STATISTIC_top_emojis
 
-
 @rate_limit(USER_RATE_LIMIT*2)
 @dp.message_handler(IsGroup(), commands="ass")
 async def ass(message: types.Message):
@@ -26,7 +25,7 @@ async def ass(message: types.Message):
     for a database's row. That's a main script for playing: it's generates random number and influence
     on length, counts spam count and send to ban bad users.
     """
-    
+
     # takes user info from message
     group_id   = message.chat.id
     user_id    = message.from_user.id
@@ -41,7 +40,7 @@ async def ass(message: types.Message):
     ass_info = db.execute(query, fetchone=True)
 
     # if user does not exist -> add him
-    if ass_info is None:  
+    if ass_info is None:
         if username is None:
             username = first_name
 
@@ -73,16 +72,16 @@ async def ass(message: types.Message):
             db.execute(query, commit=True)
 
 
-        if ass_info.blacklisted:  
+        if ass_info.blacklisted:
             t = "💢 %s, дружок, ти вже награвся, шуруй звідси" % first_name
             await message.reply(esc(t))
-        else:  
+        else:
             if int(time()) >= ass_info.endtime:  # if last_time already pasted
                 t = esc(ass_info.ass_main(message, group_id))
                 await message.reply(t)
             else:
                 # if spamcount == 5 -> blacklisted
-                if ass_info.spamcount == 5:  
+                if ass_info.spamcount == 5:
                     query = """
                         UPDATE `%d` SET blacklisted=1, length=0 WHERE user_id=%d
                     """ % (group_id, user_id)
@@ -103,7 +102,7 @@ async def is_lucky(message: types.Message):
     If user wins, user will get 200% of its length
     If user fails, user will last 60% of its length
     """
-    
+
     group_id = message.chat.id
     user_id = message.from_user.id
     firstname = message.from_user.first_name
@@ -112,7 +111,7 @@ async def is_lucky(message: types.Message):
     query = """
         SELECT luck_timeleft, length, spamcount FROM `%d` WHERE user_id=%d
     """ % (group_id, user_id)
-    
+
     inf = db.execute(query, fetchone=True)
 
     if inf is None:
@@ -123,16 +122,11 @@ async def is_lucky(message: types.Message):
         luck_timeleft, length, spamcount = inf
 
     # if a user's length is too small
-    
     if length < 100:
-        t = "Дружок, твоя дупця ще не достатньо величезна ✌️, повертайся після 100 см"
-        await message.reply(esc(t))
+        await message.reply(esc(long_messages["luck"]["tiny_ass"]))
         return
-    
     # check timeleft
     if luck_timeleft < time():
-        # if time already passed -> allow play again
-        # else deny it
 
         # chance of win
         winrate = 45
@@ -141,22 +135,17 @@ async def is_lucky(message: types.Message):
 
         if winrate >= randint(1, 100):
             t = (f"{bold(firstname + ' ОТРИМАВ ВИГРАШ!')} 📈\n\n" + 
-                esc("%s Твій приз: %d см\n" % (choice(LUCK_win_emojis), length * k_win - length)) +
-                esc("Продовжуй грати через неділю!")
+                esc("%s Твій приз: %d см\n" % (choice(LUCK_win_emojis), length * k_win - length))
                 )
-
-            await message.reply(t)
-            
             length *= k_win
         else:
             t = (f"{bold(firstname + ' ПРОГРАВ!')} 📉\n\n" +
-                esc("%s Ти програв: %d см\n" % (choice(LUCK_fail_emojis), length * k_fail)) +
-                esc("Продовжуй грати через неділю!")
+                esc("%s Ти програв: %d см\n" % (choice(LUCK_fail_emojis), length * k_fail))
                 )
-
-            await message.reply(t)
-            
             length -= length * k_fail
+
+        t += esc("Продовжуй грати через неділю!")
+        await message.reply(t)
 
         # write length to db
         query = """
@@ -192,9 +181,10 @@ async def is_lucky(message: types.Message):
 @rate_limit(USER_RATE_LIMIT*3)
 @dp.message_handler(IsGroup(), commands="leave")
 async def leave(message: types.Message):
+    leave_m = long_messages["leave"]
+
     group_id = message.chat.id
     user_id = message.from_user.id
-    
     query = """
         SELECT * FROM `%d` WHERE user_id=%d
     """ % (group_id, user_id)
@@ -202,22 +192,19 @@ async def leave(message: types.Message):
     ass_info = db.execute(query, fetchone=True)
 
     if ass_info is None:
-        t = "Ти не зарегестрований у грі!"
-        await message.answer(esc(t))
+        await message.answer(esc(long_messages["errors"]["not_registered"]))
         return
 
     ass_info = AssCore(ass_info)
     if ass_info.blacklisted:  # if user is blacklisted
-        t = "Ні, дружок, таке не проканає 😏"
-        await message.reply(esc(t))
+        await message.reply(esc(leave_m["nope"]))
     else:  # if user isn't blacklisted
         query = """
             DELETE FROM `%d` WHERE user_id=%d
         """ % (group_id, user_id)
         db.execute(query, commit=True)
-        t = "Ти покинув гру! Шкода такий гарний зад"
 
-        await message.reply(esc(t))
+        await message.reply(esc(leave_m["so_sad"]))
 
 
 # show statistics of playing user
@@ -227,16 +214,15 @@ async def statistic(message: types.Message):
     """
     This handler make and send an output message with user descending users by length
     """
-    
+
     query = """
         SELECT * FROM `%d` ORDER BY blacklisted ASC, length DESC
     """ % message.chat.id
 
     users_data = db.execute(query, fetchall=True)
-    
+
     if not users_data:
-        t = "⛔️ Нема гравців! Стань першим!"
-        await message.reply(esc(t))
+        await message.reply(esc(long_messages["errors"]["no_players"]))
         return
 
     output_message = "📊 Рейтинг гравців:\n\n"
@@ -248,7 +234,7 @@ async def statistic(message: types.Message):
 
         # (user_id, username, fisrtname, length, endtime, spamcount, blacklisted)
         user_data = AssCore(user_data)
-        
+
         if user_data.blacklisted:
             output_message += "💢 {1} залишився без дупи через спам\n".format(i, user_data.name)
             continue
