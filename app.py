@@ -19,7 +19,7 @@ from utils.set_bot_commands import set_default_commands
 from handlers import dp
 from loader import logger
 
-__version__ = "1.5.4"
+__version__ = "1.6.0"
 
 async def on_startup(dp: Dispatcher):
     middlewares.setup(dp)

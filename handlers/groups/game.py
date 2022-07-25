@@ -27,21 +27,24 @@ async def ass(message: types.Message):
     on length, counts spam count and send to ban bad users.
     """
     
-    group_id = message.chat.id
-    user_id = message.from_user.id
-    username = message.from_user.username
+    # takes user info from message
+    group_id   = message.chat.id
+    user_id    = message.from_user.id
+    username   = message.from_user.username
     first_name = message.from_user.first_name
 
+    # combine sql query and run 
     query = """
         SELECT * FROM `%d` WHERE user_id=%d
     """ % (group_id, user_id)
 
     ass_info = db.execute(query, fetchone=True)
 
-    # if user exists in database
-    if ass_info is None:  # if user didn't be registered in the game
-        if username is None:  # if user doesn't have username
+    # if user does not exist -> add him
+    if ass_info is None:  
+        if username is None:
             username = first_name
+
         ass_info = AssCore((user_id, username, first_name, 0, 0, 0, 0, 0))
 
         query = """
@@ -55,40 +58,41 @@ async def ass(message: types.Message):
 
         await message.reply(esc(t))
     else:
-        ass_info = list(ass_info)
-        if ass_info[1] != username or ass_info[2] != first_name:
+        # else update him!
+        ass_info = AssCore(ass_info)
+        # ass_info = list(ass_info)
+        if ass_info.username != username or ass_info.name != first_name:
+            if ass_info.username != username:
+                ass_info.username = username
 
-            if ass_info[1] != username:
-                ass_info[1] = username
-
-            if ass_info[2] != first_name:
-                ass_info[2] = first_name
+            if ass_info.name != first_name:
+                ass_info.name = first_name
 
             query = "UPDATE `%d` SET username='%s', name='%s' WHERE user_id=%d" % \
                     (group_id, username, first_name, user_id)
             db.execute(query, commit=True)
 
 
-        ass_info = AssCore(ass_info)
-
-        if ass_info.blacklisted:  # if already blacklisted
+        if ass_info.blacklisted:  
             t = "💢 %s, дружок, ти вже награвся, шуруй звідси" % first_name
             await message.reply(esc(t))
-        else:  # if not blacklisted
+        else:  
             if int(time()) >= ass_info.endtime:  # if last_time already pasted
-                await message.reply(esc(ass_info.ass_main(message, group_id)))
+                t = esc(ass_info.ass_main(message, group_id))
+                await message.reply(t)
             else:
-                if ass_info.spamcount == 5:  # if spamcount == 5 -> blacklisted
+                # if spamcount == 5 -> blacklisted
+                if ass_info.spamcount == 5:  
                     query = """
                         UPDATE `%d` SET blacklisted=1, length=0 WHERE user_id=%d
                     """ % (group_id, user_id)
                     db.execute(query, commit=True)
 
                     t = first_name + long_messages["spam"]
-                    await message.reply(esc(t))
                 else:
                     t = ass_info.ass_main(message, group_id)
-                    await message.reply(esc(t))
+
+            await message.reply(esc(t)
 
 
 @rate_limit(USER_RATE_LIMIT*10)
@@ -185,7 +189,7 @@ async def is_lucky(message: types.Message):
 
 
 # a user leaves the game
-@rate_limit(USER_RATE_LIMIT*2)
+@rate_limit(USER_RATE_LIMIT*3)
 @dp.message_handler(IsGroup(), commands="leave")
 async def leave(message: types.Message):
     group_id = message.chat.id
@@ -197,7 +201,7 @@ async def leave(message: types.Message):
 
     ass_info = db.execute(query, fetchone=True)
 
-    if not ass_info or ass_info is None:
+    if ass_info is None:
         t = "Ти не зарегестрований у грі!"
         await message.answer(esc(t))
         return

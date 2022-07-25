@@ -1,7 +1,8 @@
 from typing import Union
 from aiogram import types
 from utils.db_core import DbCore
-
+from time import time
+from random import randint
 
 class AssCore:
     """
@@ -10,14 +11,14 @@ class AssCore:
 
     def __init__(self, ass_info: Union[tuple, list]):
 
-        self.id = ass_info[0]
-        self.username = ass_info[1]
-        self.name = ass_info[2]
-        self.length = ass_info[3]
-        self.endtime = ass_info[4]
-        self.spamcount = ass_info[5]
-        self.blacklisted = ass_info[6]
-        self.luck_timeleft = ass_info[7]
+        self.id             = ass_info[0]
+        self.username       = ass_info[1]
+        self.name           = ass_info[2]
+        self.length         = ass_info[3]
+        self.endtime        = ass_info[4]
+        self.spamcount      = ass_info[5]
+        self.blacklisted    = ass_info[6]
+        self.luck_timeleft  = ass_info[7]
 
         self.ass_info = ass_info
 
@@ -29,8 +30,6 @@ class AssCore:
         :param group_id: Yeah, that's a group id
         :return:         Send to a database an query which change data.
         """
-
-        from time import time
 
         db = DbCore()
 
@@ -72,8 +71,6 @@ class AssCore:
                 UPDATE `%d` SET spamcount=%d WHERE user_id=%d
             """ % (group_id, self.spamcount + 1, self.id), commit=True)
         else:
-
-            from random import randint
 
             tmp_length = randint(-8, 15)
 
