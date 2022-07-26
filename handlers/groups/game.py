@@ -130,7 +130,7 @@ async def is_lucky(message: types.Message):
         luck_timeleft, length, spamcount = inf
 
     # if a user's length is too small
-    if length < 100 or not IS_DEBUG:
+    if length < 100 and not IS_DEBUG:
         await message.reply(esc(long_messages["luck"]["tiny_ass"]))
         return
     # check timeleft
@@ -142,7 +142,7 @@ async def is_lucky(message: types.Message):
         k_fail = 0.5   # 50%
 
         if winrate >= randint(1, 100):
-            t = (esc(luck_m["won"]) % (bold(firstname), chpoce(LUCK_win_emojis), length*k_win-length))
+            t = (esc(luck_m["won"]) % (bold(firstname), choice(LUCK_win_emojis), length*k_win-length))
 
             length *= k_win
         else:

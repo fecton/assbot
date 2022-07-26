@@ -6,5 +6,5 @@ from data.global_variables import __version__, LANGUAGE
 with open(f"data/language_packs/{LANGUAGE}.json") as jsonfile:
     long_messages = json.loads(jsonfile.read())
 
-long_messages["links"]["text"] = long_messages["links"]["text"] % __version__
+long_messages["about"] = long_messages["about"] % __version__
 

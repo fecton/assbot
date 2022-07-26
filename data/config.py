@@ -14,10 +14,9 @@ logger = logging.getLogger('assbot_logger')
 logger.debug("Logger created successfully!")
 
 if IS_DEBUG:
-    logger.warning(Back.RED+"DEBUG MODE is ON!"+Style.RESET_ALL)
+    logger.warning(Back.RED + " DEBUG MODE is ON! " + Style.RESET_ALL)
 else:
-    logger.info(Back.GREEN + "Debug mode is off" + Style.RESET_ALL)
-logger.info(f"USER_RATE_LIMIT = {USER_RATE_LIMIT}")
+    logger.warning(Back.GREEN + " Debug mode is off " + Style.RESET_ALL)
 
 # Loading local .env file
 load_dotenv()
