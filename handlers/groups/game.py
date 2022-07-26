@@ -17,6 +17,10 @@ from data.emojis import LUCK_win_emojis
 from data.emojis import LUCK_fail_emojis
 from data.emojis import STATISTIC_top_emojis
 
+
+errors_m = long_messages["errors"]
+
+
 @rate_limit(USER_RATE_LIMIT*2)
 @dp.message_handler(IsGroup(), commands="ass")
 async def ass(message: types.Message):
@@ -25,6 +29,8 @@ async def ass(message: types.Message):
     for a database's row. That's a main script for playing: it's generates random number and influence
     on length, counts spam count and send to ban bad users.
     """
+
+    ass_m = long_messages["ass"]
 
     # takes user info from message
     group_id   = message.chat.id
@@ -53,13 +59,13 @@ async def ass(message: types.Message):
         args = (user_id, username, first_name, 0, 0, 0, 0, 0)
         db.execute(query, args, commit=True)
 
-        t = "👋 Вітаю в нашій когорті, хлопче/дівчино!\n" + ass_info.ass_main(message, group_id)
+        t = ass_m["first_start"] + ass_info.ass_main(message, group_id)
 
         await message.reply(esc(t))
     else:
         # else update him!
         ass_info = AssCore(ass_info)
-        # ass_info = list(ass_info)
+
         if ass_info.username != username or ass_info.name != first_name:
             if ass_info.username != username:
                 ass_info.username = username
@@ -73,7 +79,7 @@ async def ass(message: types.Message):
 
 
         if ass_info.blacklisted:
-            t = "💢 %s, дружок, ти вже награвся, шуруй звідси" % first_name
+            t = (ass_m["blacklisted"] % first_name)
             await message.reply(esc(t))
         else:
             if int(time()) >= ass_info.endtime:  # if last_time already pasted
@@ -103,6 +109,8 @@ async def is_lucky(message: types.Message):
     If user fails, user will last 60% of its length
     """
 
+    luck_m = long_messages["luck"]
+
     group_id = message.chat.id
     user_id = message.from_user.id
     firstname = message.from_user.first_name
@@ -115,18 +123,18 @@ async def is_lucky(message: types.Message):
     inf = db.execute(query, fetchone=True)
 
     if inf is None:
-        t = "Ти не зарегестрований у грі: пиши /ass"
+        t = errors_m["not_registered"]
         await message.reply(esc(t))
         return
     else:
         luck_timeleft, length, spamcount = inf
 
     # if a user's length is too small
-    if length < 100 or IS_DEBUG:
+    if length < 100 or not IS_DEBUG:
         await message.reply(esc(long_messages["luck"]["tiny_ass"]))
         return
     # check timeleft
-    if luck_timeleft < time():
+    if luck_timeleft < time() or IS_DEBUG:
 
         # chance of win
         winrate = 45
@@ -134,17 +142,15 @@ async def is_lucky(message: types.Message):
         k_fail = 0.5   # 50%
 
         if winrate >= randint(1, 100):
-            t = (f"{bold(firstname + ' ОТРИМАВ ВИГРАШ!')} 📈\n\n" + 
-                esc("%s Твій приз: %d см\n" % (choice(LUCK_win_emojis), length * k_win - length))
-                )
+            t = (esc(luck_m["won"]) % (bold(firstname), chpoce(LUCK_win_emojis), length*k_win-length))
+
             length *= k_win
         else:
-            t = (f"{bold(firstname + ' ПРОГРАВ!')} 📉\n\n" +
-                esc("%s Ти програв: %d см\n" % (choice(LUCK_fail_emojis), length * k_fail))
-                )
+            t = (esc(luck_m["fail"]) % (bold(firstname), choice(LUCK_fail_emojis), length*k_fail))
+
             length -= length * k_fail
 
-        t += esc("Продовжуй грати через неділю!")
+        t += esc(luck_m["continue_after_a_week"])
         await message.reply(t)
 
         # write length to db
@@ -165,8 +171,8 @@ async def is_lucky(message: types.Message):
         days_left = ceil(int(luck_timeleft - time()) / 86400)
         # answer with a count of days
 
-        output_message = "Козаче, тиждень ще не пройшов! Спробуй через " + f"{'1 день' if days_left == 1 else f'{days_left} дні'}"
-    
+        output_message = luck_m["time_isnt_passed"] + f"{'1 день' if days_left == 1 else f'{days_left} дні'}"
+
         await message.reply(esc(output_message))
 
         # increment spamcount and write it
@@ -215,6 +221,8 @@ async def statistic(message: types.Message):
     This handler make and send an output message with user descending users by length
     """
 
+    stat_m = long_messages["statistic"]
+
     query = """
         SELECT * FROM `%d` ORDER BY blacklisted ASC, length DESC
     """ % message.chat.id
@@ -225,39 +233,31 @@ async def statistic(message: types.Message):
         await message.reply(esc(long_messages["errors"]["no_players"]))
         return
 
-    output_message = "📊 Рейтинг гравців:\n\n"
+    output_message = stat_m["header"]
 
-    i = 0
+    i = -1
 
     for user_data in users_data:
-        # user_data = list(user_data)
+        i += 1
 
         # (user_id, username, fisrtname, length, endtime, spamcount, blacklisted)
         user_data = AssCore(user_data)
 
         if user_data.blacklisted:
-            output_message += "💢 {1} залишився без дупи через спам\n".format(i, user_data.name)
-            continue
+            output_message = (stat_m["blacklisted"] % user_data.name)
+        elif i == 0:
+            if user_data.length == 0:
+                output_message += (stat_m["zero_king"] % (STATISTIC_top_emojis[i]+" ", user_data.name))
+            else:
+                output_message += (stat_m["king"] % (STATISTIC_top_emojis[i], user_data.name, user_data.length))
 
-        if i < len(STATISTIC_top_emojis):  # with emojis
-            if i == 0:  # if is king
-                if user_data.length == 0:  # "👑  Безжопий царь {username}"
-                    output_message += "     %s Безжопий царь %s\n\n" % (STATISTIC_top_emojis[i]+" ", user_data.name)
-                else:                     # "👑  Царь {username}"
-                    output_message += "     %s Царь %s — %d см\n\n" % (
-                        STATISTIC_top_emojis[i], user_data.name, user_data.length
-                    )
-            else:
-                output_message += STATISTIC_top_emojis[i] + " "
-                if not user_data.length:
-                    output_message += "{0}. {1} — не має сіднички\n".format(i, user_data.name)
-                else:
-                    output_message += "{0}. {1} — {2} см\n".format(i, user_data.name, user_data.length)
-        else:  # without emojis
-            if not user_data.length:
-                output_message += "{0}. {1} — не має сіднички\n".format(i, user_data.name)
-            else:
-                output_message += "{0}. {1} — {2} см\n".format(i, user_data.name, user_data.length)
-        i += 1
+            continue
+        elif i < len(STATISTIC_top_emojis):
+            output_message += STATISTIC_top_emojis[i] + " "
+
+        if user_data.length == 0:
+            output_message += (stat_m["zero_ass"] % (i, user_data.name))
+        else:
+            output_message += (stat_m["positive_ass"] % (i, user_data.name, user_data.length))
 
     await message.reply(esc(output_message))

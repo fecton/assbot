@@ -18,6 +18,7 @@ from states import Ask_Text
 
 notify_m = long_messages["notify"]
 errors_m = long_messages["errors"]
+admin_m = long_messages["admin"]
 
 
 @dp.message_handler(IsAdmin(), commands="admin")
@@ -25,7 +26,7 @@ async def show_admin_help(message: types.Message):
     """
     Admin help
     """
-    await message.answer(esc(long_messages["admin"]))
+    await message.answer(esc(admin_m["help"]))
 
 
 
@@ -57,9 +58,11 @@ async def notify_all_groups(message: types.Message, state: FSMContext):
     Notify all groups in the database with admin's message
     """
 
+    confirm_m = list(long_messages["confirmation"].values())
+
     text = (await state.get_data())["text"]
 
-    if message.text in ["y", "yes", "так", "т"]:
+    if message.text in confirm_m:
         query = "SELECT * FROM `groups_name`"
         groups_list = db.execute(query, fetchall=True)
 
@@ -104,7 +107,8 @@ async def show_groups(message: types.Message):
     for group in groups_info:
         groups_dict[group[0]] = group[1]
 
-    output_message = f"✅ {bold('TABLES')}\n" + esc("-") * 16 + "\n"
+    output_message = bold(admin_m["groups"]) + "\n" + esc("-") * 16 + "\n"
+
     if len(groups_dict.keys()) != 0:
         for key in groups_dict.keys():
             output_message += f"{code(str(key))}" + " : " + esc(groups_dict[key]) + "\n"
@@ -140,8 +144,8 @@ async def show_blacklisted_users(message: types.Message):
     if not users_data:
         await message.answer(esc(errors_m["no_users"]))
     else:
-        output_message = f"{'👥 Group:' + code(group_id)}\n"
-        output_message += "ІД : Юзернейм : Ім'я гравця\n\n"
+        output_message = admin_m["current_group"] + code(group_id) + "\n" 
+        output_message += admin_m["blacklisted_struct"]
 
         users_count = 0
         for user_data in users_data:
@@ -151,12 +155,12 @@ async def show_blacklisted_users(message: types.Message):
             else:
                 output_message += f"💢 {user_data[0]} :  @{user_data[1]} : {user_data[2]}\n"
 
-        output_message += '\n📌 Усього: '
+        output_message += admin_m["totally"]
 
         if users_count == 1:
-            output_message += "1 гравець"
+            output_message += admin_m["one_player"]
         else:
-            output_message += "%d гравців" % users_count
+            output_message += (admin_m["many_players"] % users_count)
         await message.answer(output_message)
 
 
@@ -223,7 +227,7 @@ async def ban(message: types.Message):
             UPDATE `%d` SET blacklisted=1 WHERE user_id=%d
         """ % (ban_group, user_to_ban)
         db.execute(query, commit=True)
-        t = "✅ Користувач отримав по своїй сідничці!"
+        t = admin_m["banned"]
     else:
         t = errors_m["unknown_user"]
 
@@ -277,9 +281,9 @@ async def unban(message: types.Message):
                 UPDATE `%d` SET blacklisted=0, spamcount=0 WHERE user_id=%d
             """ % (group_id, user_id)
             db.execute(query, commit=True)
-            t = "✅ Користувач може повернутися до гри!"
+            t = admin_m["unbanned"]
         else:
-            t = "❌ Користувач не заблокований!"
+            t = admin_m["isnt_banned"]
         await message.answer(esc(t))
 
     except sqlite3.OperationalError:
@@ -297,7 +301,7 @@ async def show_reports(message: types.Message):
     users = db.execute(query, fetchall=True)
 
     if users:  # if users exist in group's table
-        output_message = "NAME:MESSAGE\n\n"
+        output_message = admin_m["reports_struct"]
         for user in users:
             output_message += f"🚩 {user[4]} : {user[5]}\n"
         await message.answer(esc(output_message))
@@ -317,7 +321,7 @@ async def show_detailed_reports(message: types.Message):
     users = db.execute(query, fetchall=True)
 
     if users:  # if users exist in group's table
-        output_message = "GRPID:GRPNAME:USERRID:USERNAME:NAME:MESSAGE\n\n"
+        output_message = admin_m["dreports_struct"]
         for user in users:
             if user[0] == user[2]:
                 output_message += f"🚩 {user[0]} : {user[1]} : @{user[3]} : {user[4]} : {user[5]}\n\n"
@@ -325,7 +329,7 @@ async def show_detailed_reports(message: types.Message):
                 output_message += f"🚩 {user[0]} : {user[1]} : {user[2]} : @{user[3]} : {user[4]} : {user[5]}\n\n"
         await message.answer(esc(output_message))
     else:
-        t = "⛔️ Ще нема звітів"
+        t = admin_m["empty_reports"]
         await message.answer(esc(t))
 
 
@@ -340,7 +344,7 @@ async def clear_reports(message: types.Message):
     """
     db.execute(query, commit=True)
 
-    t = "✅ Звіти повністю очищені!" 
+    t = admin_m["reports_cleaned"]
 
     await message.answer(esc(t))
 
@@ -367,8 +371,8 @@ async def show_users(message: types.Message):
     try:
         query = "SELECT * FROM `%d`" % group_id
         users = db.execute(query, fetchall=True)
-        output_message = f"👥 Група: {code(group_id)}\n"
-        output_message += "ІД:Нікнейм:Ім'я:Довжина:Спам:Можливість грати\n\n"
+        output_message = admin_m["current_group"] + code(group_id) + "\n"
+        output_message += admin_m["group_struct"]
 
         user_count = 0
         for user in users:
@@ -387,11 +391,11 @@ async def show_users(message: types.Message):
 
             output_message += f" : {user.length} : {user.spamcount} : {blacklisted}\n"
 
-        output_message += "\n📌 Усього: "
+        output_message += admin_m["totally"]
         if user_count == 1:
-            output_message += "1 гравець"
+            output_message += admin_m["one_player"]
         else:
-            output_message += f"{user_count} гравців"
+            output_message += (admin_m["many_players"] % user_count)
 
         await message.answer(output_message)
     except sqlite3.OperationalError:

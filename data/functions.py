@@ -3,7 +3,11 @@ from aiogram import types
 from utils.db_core import DbCore
 from time import time
 from random import randint
+
 from data.config import IS_DEBUG
+from data.long_messages import long_messages
+
+assmain_m = long_messages["ass_main"]
 
 
 class AssCore:
@@ -52,22 +56,14 @@ class AssCore:
             # append time to wait
             if hours == 0:
                 if minutes == 0:
-                    output_message = (
-                        "{0}, готую вимірювальні пристрої, зачекай хвильку".format(self.username, minutes)
-                    )
+                    output_message = (assmain_m["almost_zero"] % (self.username))
                 else:
-                    output_message = (
-                        "{0}, ти вже грав! Зачекай {1} хв.".format(self.username, minutes)
-                    )
+                    output_message = (assmain_m["hours_zero"] % (self.username, minutes))
             else:
                 if minutes == 0:
-                    output_message = (
-                        "{0}, ти вже грав! Зачекай {1} год.".format(self.username, hours)
-                    )
+                    output_message = (assmain_m["minutes_zero"] % (self.username, hours))
                 else:
-                    output_message = (
-                        "{0}, ти вже грав! Зачекай {1} год. {2} хв.".format(self.username, hours, minutes)
-                    )
+                    output_message = (assmain_m["hours_minutes"] % (self.username, hours, minutes))
 
             db.execute("""
                 UPDATE `%d` SET spamcount=%d WHERE user_id=%d
@@ -81,31 +77,25 @@ class AssCore:
             else:
                 self.username = "@" + message.from_user.username
 
-            output_message = "{0}, твоя дупця ".format(self.username)
+            output_message = assmain_m["your_ass"] % self.username
 
             if tmp_length == 0:
-                output_message += "не змінила розміру. "
+                output_message += assmain_m["didn't_change"]
             elif tmp_length > 0:
-                output_message += (
-                    "підросла на {0} см! Зараз твоя дупця прям бомбезна. ".format(tmp_length)
-                )
+                output_message += (assmain_m["icreased"] % tmp_length)
             elif tmp_length < 0:
                 if self.length + tmp_length <= 0:
-                    output_message += (
-                        "зникла! "
-                    )
+                    output_message += assmain_m["disappeared"]
                 else:
-                    output_message += (
-                        "зменшилась на {0} см! Зараз твоя дупця вже не файна. ".format(tmp_length * -1)
-                    )
+                    output_message += (assmain_m["decreased"] % (tmp_length * -1))
 
             self.length = self.length + tmp_length
 
             if self.length <= 0:
                 self.length = 0
-                output_message += "Зараз ти не маєш заду. "
+                output_message += assmain_m["equals_zero"]
             else:
-                output_message += "\nНаразі ваша дупенція становить: {0} см. ".format(self.length)
+                output_message += (assmain_m["greater_than_zero"] % self.length)
 
             self.endtime = int(time()) + randint(3600, 72000)  # from 1 hour to 20 hours
             last_time = self.endtime - int(time())

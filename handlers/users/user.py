@@ -3,8 +3,11 @@ from aiogram.utils.markdown import escape_md as esc
 from loader import dp, db
 from data.config import SUPER_USERS, USER_RATE_LIMIT
 from data.functions import user_input
+from data.long_messages import long_messages
 from data.structures import ReportStructure
 from utils.set_rate_limit import rate_limit
+
+errors_m = long_messages["errors"]
 
 
 # REPORT "message"
@@ -17,15 +20,8 @@ async def report(message: types.Message):
     
     m = user_input(message, "/r")
 
-    if len(m) < 10:
-        if len(m.strip()) == 0:
-            t = "Ти забув уввести свій звіт!"
-        else:
-            t = "Звіт дуже малий!"
-        await message.reply(esc(t))
-
-    elif m[2] == "@" or "--" in m or "#" in m:
-        t = "Невірний формат!"
+    if len(m) < 10 or len(m.strip()) == 0 or m[2] == "@" or "--" in m or "#" in m:
+        t = errors_m["illegal_format"]
         await message.reply(esc(t))
     else:
         Rdata = ReportStructure(message.chat.id, message.chat.title, message.from_user.id, message.from_user.username, message.from_user.first_name, m)
@@ -42,7 +38,8 @@ async def report(message: types.Message):
 
         for admin in SUPER_USERS:
             # if user doesn't have @username it will sent his name
-            text = "[R] Надісланий звіт від %s, детальніше: /reports, /dreports"
+            text = long_messages["admin"]["gotten_report"]
+
             if Rdata.user_name == "N/A":
                 await dp.bot.send_message(
                     admin,
