@@ -3,6 +3,7 @@ from aiogram import types
 from utils.db_core import DbCore
 from time import time
 from random import randint
+from data.config import IS_DEBUG
 
 
 class AssCore:
@@ -34,7 +35,7 @@ class AssCore:
 
         db = DbCore()
 
-        if self.endtime > int(time()):
+        if self.endtime > int(time()) and not IS_DEBUG:
             last_time = self.endtime - int(time())
 
             hours = int(last_time / 3600)

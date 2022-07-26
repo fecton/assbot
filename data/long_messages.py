@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from aiogram.utils.markdown import escape_md
-from app import __version__
+from data.global_variables import __version__
 
 long_messages = {
 

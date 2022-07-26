@@ -11,7 +11,7 @@ from data.functions import AssCore
 from filters import IsGroup
 from utils.set_rate_limit import rate_limit
 from time import time
-from data.config import USER_RATE_LIMIT
+from data.config import USER_RATE_LIMIT, IS_DEBUG
 
 from data.emojis import LUCK_win_emojis
 from data.emojis import LUCK_fail_emojis
@@ -122,7 +122,7 @@ async def is_lucky(message: types.Message):
         luck_timeleft, length, spamcount = inf
 
     # if a user's length is too small
-    if length < 100:
+    if length < 100 or IS_DEBUG:
         await message.reply(esc(long_messages["luck"]["tiny_ass"]))
         return
     # check timeleft
