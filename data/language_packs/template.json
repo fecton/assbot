@@ -1,0 +1,109 @@
+{
+	"confirmation": {
+		"short": "",
+		"long" : ""
+	},
+
+    "start": "",
+
+    "help": "",
+
+	"admin": {
+		"help": "",
+		"groups": "",
+		"current_group": "",
+		"blacklisted_struct": "",
+		"totally": "",
+		"one_player": "",
+		"many_players": "%d ",
+		"banned": "",
+		"unbanned": "",
+		"isnt_banned": "",
+		"reports_struct": "",
+		"dreports_struct": "",
+		"empty_reports": "",
+		"reports_cleaned": "",
+		"group_struct": "",
+		"gotten_report": "Message from %s..."
+	},
+
+	"about": "AssBot v%s GNU Licence 2022",
+
+    "links": {
+		"github": "https://github.com/fecton",
+		"telegram_channel": "https://t.me/varlife"
+	},
+
+    "spam": "",
+
+    "errors": {
+		"not_registered": "",
+		"no_players": "",
+		"no_group": "",
+		"no_users": "",
+		"unknown_group": "",
+		"unknown_user": "",
+		"illegal_format": ""
+	},
+
+	"notify": {
+		"enter_message": "",
+		"are_you_sure": "",
+		"success": "",
+		"cancel": ""
+	},
+	
+	"ass": {
+		"first_start": "",
+		"blacklisted": "%s, dude, you are banned"
+	},
+
+	"ass_main": {
+		"almost_zero": "%s, wait a second",
+		"hours_zero": "%s, wait %d minutes",
+		"minutes_zero": "%s, wait %d hours",
+		"hours_minutes": "%s, wait %d hours and %d minutes",
+		"your_ass": "%s your ass",
+		"didn't_change": "",
+		"icreased": "incresed by %d cm",
+		"disappeared": "",
+		"decreased": "decreased by %d cm",
+
+		"equals_zero": "",
+		"greater_than_zero": "Now it equals %d cm"
+	},
+
+	"luck": {
+		"tiny_ass": "",
+		"won" : "%s has a prize, %s your prize: %d cm",
+		"fail" : "%s failed, %s your fail: %d cm",
+		"continue_after_a_week": "",
+		"time_isnt_passed": ""
+	},
+
+	"leave": {
+		"nope": "",
+		"so_sad": ""
+	},
+
+	"statistic": {
+		"header": "",
+		"blacklisted": "%s is banned",
+		"zero_king": "%s Zero king %s",
+		"king": "%s King %s - %s",
+		"zero_ass": "%d. %s — zero ass",
+		"positive_ass": "%d. %s — %d cm"
+	},
+
+	"commands": {
+		"start": "",
+		"ass": "",
+		"luck": "",
+		"leave": "",
+		"statistic": "",
+		"about": "",
+		"help": ""
+	},
+
+	"notify_admins": "Hi! '%s' is ok!\nRuntime: %s"
+}
