@@ -1,4 +1,4 @@
-__version__ = "1.6.0"
+__version__ = "1.7.0"
 
 DB_NAME = "list.sqlite3"
 USER_RATE_LIMIT = 60

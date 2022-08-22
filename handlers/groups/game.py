@@ -1,4 +1,5 @@
 import sqlite3
+import asyncio
 
 from aiogram import types
 from aiogram.utils.markdown import bold, italic, code
@@ -24,6 +25,34 @@ from data.emojis import STATISTIC_top_emojis
 
 
 errors_m = long_messages["errors"]
+
+
+async def answer(message: types.Message, t: str, delay: int = 3):
+    """
+    message.answer with timeout and auto deletion the message
+
+    message: a message taked by handler
+    t: text
+    delay: timeout for message
+    """
+
+    sentM = (await message.answer(t))
+    await asyncio.sleep(delay)
+    await sentM.delete()
+
+
+async def reply(message: types.Message, t: str, delay: int = 3):
+    """
+    message.reply with timeout and auto deletion the message
+
+    message: a message taked by handler
+    t: text
+    delay: timeout for message
+    """
+
+    sentM = (await message.reply(t))
+    await asyncio.sleep(delay)
+    await sentM.delete()
 
 
 @rate_limit(USER_RATE_LIMIT*2)
@@ -68,9 +97,9 @@ async def ass(message: types.Message):
         args = (user_id, username, first_name, 0, 0, 0, 0, 0)
         db.execute(query, args, commit=True)
 
-        t = ass_m["first_start"] + ass_info.ass_main(message, group_id)
+        t = esc(ass_m["first_start"] + ass_info.ass_main(message, group_id))
 
-        await message.reply(esc(t))
+        await reply(message, t)
     else:
         # else update him!
         ass_info = AssCore(ass_info)
@@ -88,12 +117,10 @@ async def ass(message: types.Message):
 
 
         if ass_info.blacklisted:
-            t = (ass_m["blacklisted"] % first_name)
-            await message.reply(esc(t))
+            t = ass_m["blacklisted"] % first_name
         else:
             if int(time()) >= ass_info.endtime:  # if last_time already pasted
-                t = esc(ass_info.ass_main(message, group_id))
-                await message.reply(t)
+                t = ass_info.ass_main(message, group_id)
             else:
                 # if spamcount == 5 -> blacklisted
                 if ass_info.spamcount == 5:
@@ -106,8 +133,9 @@ async def ass(message: types.Message):
                 else:
                     t = ass_info.ass_main(message, group_id)
 
-                await message.reply(esc(t))
+        t = esc(t)
 
+        await reply(message, t)
 
 @rate_limit(USER_RATE_LIMIT*10)
 @dp.message_handler(IsGroup(), commands="luck")
@@ -136,15 +164,16 @@ async def is_lucky(message: types.Message):
         inf = None
 
     if inf is None:
-        t = errors_m["not_registered"]
-        await message.reply(esc(t))
+        t = esc(errors_m["not_registered"])
+        await reply(message, t)
         return
     else:
         luck_timeleft, length, spamcount = inf
 
     # if a user's length is too small
     if length < 100 and not IS_DEBUG:
-        await message.reply(esc(long_messages["luck"]["tiny_ass"]))
+        t = esc(long_messages["luck"]["tiny_ass"])
+        await reply(message, t)
         return
     # check timeleft
     if luck_timeleft < time() or IS_DEBUG:
@@ -163,7 +192,7 @@ async def is_lucky(message: types.Message):
             length -= length * k_fail
 
         t += esc(luck_m["continue_after_a_week"])
-        await message.reply(t)
+        await reply(message, t)
 
         # write length to db
         query = """
@@ -183,9 +212,9 @@ async def is_lucky(message: types.Message):
         days_left = ceil(int(luck_timeleft - time()) / 86400)
         # answer with a count of days
 
-        output_message = luck_m["time_isnt_passed"] + f"{'1 день' if days_left == 1 else f'{days_left} дні'}"
+        t = esc(luck_m["time_isnt_passed"] + f"{'1 день' if days_left == 1 else f'{days_left} дні'}")
 
-        await message.reply(esc(output_message))
+        await reply(message, t)
 
         # increment spamcount and write it
         spamcount += 1
@@ -210,19 +239,23 @@ async def leave(message: types.Message):
     ass_info = db.execute(query, fetchone=True)
 
     if ass_info is None:
-        await message.answer(esc(long_messages["errors"]["not_registered"]))
+        t = esc(long_messages["errors"]["not_registered"])
+
+        await answer(message, t)
         return
 
     ass_info = AssCore(ass_info)
     if ass_info.blacklisted:  # if user is blacklisted
-        await message.reply(esc(leave_m["nope"]))
+        t = esc(leave_m["nope"])
     else:  # if user isn't blacklisted
         query = """
             DELETE FROM `%d` WHERE user_id=%d
         """ % (group_id, user_id)
         db.execute(query, commit=True)
 
-        await message.reply(esc(leave_m["so_sad"]))
+        t = esc(leave_m["so_sad"])
+
+    await reply(message, t)
 
 
 # show statistics of playing user
@@ -242,7 +275,8 @@ async def statistic(message: types.Message):
     users_data = db.execute(query, fetchall=True)
 
     if not users_data:
-        await message.reply(esc(long_messages["errors"]["no_players"]))
+        t = esc(long_messages["errors"]["no_players"])
+        await reply(message, t)
         return
 
     output_message = stat_m["header"]
@@ -272,4 +306,5 @@ async def statistic(message: types.Message):
         else:
             output_message += (stat_m["positive_ass"] % (i, user_data.name, user_data.length))
 
-    await message.reply(esc(output_message))
+    output_message = esc(output_message)
+    await reply(message, output_message)
