@@ -110,8 +110,15 @@ async def show_groups(message: types.Message):
     output_message = bold(admin_m["groups"]) + "\n" + esc("-") * 16 + "\n"
 
     if len(groups_dict.keys()) != 0:
+        i = 0
         for key in groups_dict.keys():
-            output_message += f"{code(str(key))}" + " : " + esc(groups_dict[key]) + "\n"
+            a = code(str(key))
+            output_message += f"{a}" + " : " + esc(groups_dict[key]) + "\n"
+            i += 1
+            if i == 100:
+                i = 0
+                await message.answer(output_message)
+                output_message = ""
         output_message += esc("-") * 16
         await message.answer(output_message)
     else:

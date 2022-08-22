@@ -1,17 +1,22 @@
+import sqlite3
+
 from aiogram import types
 from aiogram.utils.markdown import bold, italic, code
 from aiogram.utils.markdown import escape_md as esc
-from time import time
-from math import ceil
-from random import randint, choice
 
 from loader import dp, db
+
+from math import ceil
+from random import randint, choice
+from filters import IsGroup
+from time import time
+
+from utils.set_rate_limit import rate_limit
+from utils.db_core import DbCore
+
+from data.config import USER_RATE_LIMIT, IS_DEBUG
 from data.long_messages import long_messages
 from data.functions import AssCore
-from filters import IsGroup
-from utils.set_rate_limit import rate_limit
-from time import time
-from data.config import USER_RATE_LIMIT, IS_DEBUG
 
 from data.emojis import LUCK_win_emojis
 from data.emojis import LUCK_fail_emojis
@@ -43,7 +48,11 @@ async def ass(message: types.Message):
         SELECT * FROM `%d` WHERE user_id=%d
     """ % (group_id, user_id)
 
-    ass_info = db.execute(query, fetchone=True)
+    try:
+        ass_info = db.execute(query, fetchone=True)
+    except sqlite3.OperationalError:
+        db.create_group_table(group_id)
+        ass_info = None
 
     # if user does not exist -> add him
     if ass_info is None:
@@ -120,7 +129,11 @@ async def is_lucky(message: types.Message):
         SELECT luck_timeleft, length, spamcount FROM `%d` WHERE user_id=%d
     """ % (group_id, user_id)
 
-    inf = db.execute(query, fetchone=True)
+    try:
+        inf = db.execute(query, fetchone=True)
+    except sqlite3.OperationalError:
+        db.create_group_table(group_id)
+        inf = None
 
     if inf is None:
         t = errors_m["not_registered"]
@@ -136,7 +149,6 @@ async def is_lucky(message: types.Message):
     # check timeleft
     if luck_timeleft < time() or IS_DEBUG:
 
-        # chance of win
         winrate = 45
         k_win = 2  # 200%
         k_fail = 0.5   # 50%
