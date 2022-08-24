@@ -39,7 +39,7 @@ logger.debug("Logger created successfully!")
 if IS_DEBUG:
     logger.warning(Back.RED + " DEBUG MODE is ON! " + Style.RESET_ALL)
 else:
-    logger.warning(Back.GREEN + " Debug mode is off " + Style.RESET_ALL)
+    logger.info(Back.GREEN + " Debug mode is off " + Style.RESET_ALL)
 
 # Loading local .env file
 load_dotenv()
