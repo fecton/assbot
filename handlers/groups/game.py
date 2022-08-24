@@ -15,14 +15,8 @@ from time import time
 from utils.set_rate_limit import rate_limit
 from utils.db_core import DbCore
 
-from data.config import USER_RATE_LIMIT, IS_DEBUG
-from data.long_messages import long_messages
+from data.config import USER_RATE_LIMIT, IS_DEBUG, long_messages, LUCK_win_emojis, LUCK_fail_emojis, STATISTIC_top_emojis
 from data.functions import AssCore
-
-from data.emojis import LUCK_win_emojis
-from data.emojis import LUCK_fail_emojis
-from data.emojis import STATISTIC_top_emojis
-
 
 errors_m = long_messages["errors"]
 

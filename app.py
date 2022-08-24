@@ -13,9 +13,7 @@
 from aiogram import Dispatcher, executor
 
 import middlewares
-from data.logger_config import LOGGING_CONFIG
-from utils.notify_admins import on_startup_notify
-from utils.set_bot_commands import set_default_commands
+from utils.start_setup import on_startup_notify, set_default_commands
 from handlers import dp
 from loader import logger
 
