@@ -1,5 +1,5 @@
 from aiogram import types
-from data.long_messages import long_messages
+from data.config import long_messages
 
 
 about_keyboard = types.InlineKeyboardMarkup(

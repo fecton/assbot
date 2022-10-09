@@ -4,8 +4,7 @@ from utils.db_core import DbCore
 from time import time
 from random import randint
 
-from data.config import IS_DEBUG
-from data.long_messages import long_messages
+from data.config import IS_DEBUG, long_messages
 
 assmain_m = long_messages["ass_main"]
 

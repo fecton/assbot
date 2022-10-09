@@ -2,9 +2,32 @@ import logging.config
 
 from os import getenv
 from dotenv import load_dotenv
-from data.logger_config import LOGGING_CONFIG
-from data.global_variables import *
+from json import loads
 from colorama import Fore, Back, Style
+
+def get_content(filename: str) -> dict:
+    """
+    Takes a filename (path) and returns its content in a dictionary
+    """
+    with open(filename) as f:
+        t = loads(f.read())
+    return t
+
+# LOADS DATA FROM JSON
+
+# global varibles
+__version__, DB_NAME, USER_RATE_LIMIT, IS_DEBUG, LANGUAGE = get_content('data/cfg/global.json').values()
+
+# long messages
+long_messages = get_content(f"data/language_packs/{LANGUAGE}.json")
+long_messages["about"] %= __version__
+
+# logging config
+LOGGING_CONFIG = get_content('data/cfg/logger.json')
+
+# emojis for /statistic
+LUCK_win_emojis, LUCK_fail_emojis, STATISTIC_top_emojis = get_content('data/language_packs/emojis.json').values()
+
 
 if not IS_DEBUG:
     LOGGING_CONFIG["loggers"]["assbot_logger"]["level"] = "INFO"
@@ -16,16 +39,14 @@ logger.debug("Logger created successfully!")
 if IS_DEBUG:
     logger.warning(Back.RED + " DEBUG MODE is ON! " + Style.RESET_ALL)
 else:
-    logger.warning(Back.GREEN + " Debug mode is off " + Style.RESET_ALL)
+    logger.info(Back.GREEN + " Debug mode is off " + Style.RESET_ALL)
 
 # Loading local .env file
 load_dotenv()
 logger.debug("Env variables loaded successfully!")
 
 try:
-    # TOKEN from BotFather: @BotFather
     TOKEN = getenv("TOKEN")
-    # Your id from: @RawDataBot
     OWNER = getenv("OWNER")
 
     if TOKEN is None:

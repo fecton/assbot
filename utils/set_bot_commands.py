@@ -1,5 +1,5 @@
 from aiogram import types, Dispatcher
-from data.long_messages import long_messages
+from data.config import long_messages
 
 c_m = long_messages["commands"]
 

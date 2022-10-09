@@ -3,11 +3,10 @@ from aiogram.dispatcher.filters.builtin import CommandStart, CommandHelp
 from aiogram.utils.markdown import escape_md as esc
 
 from loader import dp
-from data.long_messages import long_messages
-from data.config import USER_RATE_LIMIT
+from data.config import USER_RATE_LIMIT, long_messages
 from utils.set_rate_limit import rate_limit
 
-from keyboards.Inline import about_keyboard
+from keyboards.inline import about_keyboard
 
 
 @rate_limit(USER_RATE_LIMIT)
