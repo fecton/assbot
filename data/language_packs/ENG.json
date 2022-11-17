@@ -51,11 +51,6 @@
 		"cancel": "[NOTIFY] The procedure canceled"
 	},
 
-    "links": {
-		"github": "https://github.com/fecton",
-		"telegram_channel": "https://t.me/varlife"
-	},
-
 	"ass": {
 		"first_start": "Welcum dude!",
 		"blacklisted": "%s, dude, you are banned"

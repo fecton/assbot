@@ -9,7 +9,7 @@ def get_content(filename: str) -> dict:
     """
     Takes a filename (path) and returns its content in a dictionary
     """
-    with open(filename) as f:
+    with open(filename, encoding='utf-8') as f:
         t = loads(f.read())
     return t
 
