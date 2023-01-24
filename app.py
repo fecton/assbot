@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin python3
 # -*- encoding: utf-8 -*-
 
 # Open-Source AssBot 2023
