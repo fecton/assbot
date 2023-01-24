@@ -5,6 +5,9 @@ from config import long_messages
 about_keyboard = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [
+            types.InlineKeyboardButton("🕸 Website", url=long_messages["links"]["website"])
+        ],
+        [
             types.InlineKeyboardButton("⚫️ GitHub", url=long_messages["links"]["github"]),
         ],
         [

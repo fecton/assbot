@@ -1,3 +1,2 @@
-from .config import *
-from .functions import *
+from .cfg import *
 from .structures import *

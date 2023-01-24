@@ -30,6 +30,7 @@
 	"about": "AssBot v%s GNU Licence 2022",
 
     "links": {
+		"website": "https://alytvynenko.online",
 		"github": "https://github.com/fecton",
 		"telegram_channel": "https://t.me/varlife"
 	},

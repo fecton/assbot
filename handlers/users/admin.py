@@ -9,7 +9,8 @@ from aiogram.utils.markdown import bold, italic, code
 from aiogram.utils.markdown import escape_md as esc
 from loader import dp, logger
 
-from config import AssCore, user_input, long_messages
+from config import long_messages
+from utils import AssCore, user_input
 
 from filters import IsAdmin
 from loader import db, bot

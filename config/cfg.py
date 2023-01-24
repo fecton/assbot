@@ -5,11 +5,20 @@ from dotenv import load_dotenv
 from json import loads
 from colorama import Fore, Back, Style
 
+from pathlib import Path, PurePath
+
+absolute_path = Path().absolute()
+
+while absolute_path.name != 'assbot':
+    absolute_path = absolute_path.parent
+
 
 def get_content(filename: str) -> dict:
     """
     Takes a filename (path) and returns its content in a dictionary
     """
+    filename = Path(PurePath(absolute_path), PurePath(filename))
+
     try:
         with open(filename, encoding='utf-8') as f:
             return loads(f.read())

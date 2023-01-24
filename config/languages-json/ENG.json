@@ -27,9 +27,9 @@
 	"about": "AssBot v%s GNU Licence 2022",
 
     "links": {
+		"website": "https://alytvynenko.online",
 		"github": "https://github.com/fecton",
-		"telegram_channel": "https://t.me/varlife",
-		"text": "AssBot v%s GNU Licence 2022"
+		"telegram_channel": "https://t.me/varlife"
 	},
 
     "spam": ", hey, dude, you may think it is funny but not for me :D",
@@ -49,11 +49,6 @@
 		"are_you_sure": "[NOTIFY] Are your sure? y/n (yes/no)",
 		"success": "[NOTIFY] The message was sent to groups!",
 		"cancel": "[NOTIFY] The procedure canceled"
-	},
-
-    "links": {
-		"github": "https://github.com/fecton",
-		"telegram_channel": "https://t.me/varlife"
 	},
 
 	"ass": {
