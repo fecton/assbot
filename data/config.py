@@ -5,10 +5,15 @@ from dotenv import load_dotenv
 from json import loads
 from colorama import Fore, Back, Style
 
+from pathlib import Path, PurePath
+
+assbot_path = Path().absolute()
+
 def get_content(filename: str) -> dict:
     """
     Takes a filename (path) and returns its content in a dictionary
     """
+    filename = PurePath(assbot_path, Path(filename))
     with open(filename) as f:
         t = loads(f.read())
     return t
