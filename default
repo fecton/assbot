@@ -1,5 +1,5 @@
+# assbot:default
 FROM ubuntu:latest
-
 
 RUN echo "[INFO] Installing python and pip"
 RUN apt update -y
@@ -17,9 +17,3 @@ RUN	cd /usr/games/ && \
 	cd assbot && \
 	chmod +x app.py && \
 	pip3 install -r requirements.txt 
-
-COPY .env /usr/games/assbot
-
-ENV ASSBOT_DOCKER=1
-
-CMD ["python3", "/usr/games/assbot/app.py", "-DFOREGROUND"]

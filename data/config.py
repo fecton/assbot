@@ -7,22 +7,17 @@ from colorama import Fore, Back, Style
 
 from pathlib import Path, PurePath
 
-assbot_path = Path().absolute()
-
-if 'ASSBOT_DOCKER' in os.environ:
-    assbot_path = Path('/usr/games/assbot')
 
 def get_content(filename: str) -> dict:
     """
     Takes a filename (path) and returns its content in a dictionary
     """
     try:
-        filename = PurePath(assbot_path, Path(filename))
+        filename = PurePath(filename, Path(filename))
         with open(filename, encoding='utf-8') as f:
-            t = loads(f.read())
-        return t
+            return loads(f.read())
     except FileNotFoundError as err:
-        print("[ERROR] %s\n%s" % (err, assbot_path.absolute()))
+        print("[ERROR] %s\n%s" % (err, filename))
         exit(-1)
 
 # LOADS DATA FROM JSON
