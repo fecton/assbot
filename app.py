@@ -1,11 +1,12 @@
-#!/usr/bin/env python3
+#!/usr/bin python3
 # -*- encoding: utf-8 -*-
 
-# Open-Source AssBot 2022
+# Open-Source AssBot 2023
 # ------------------------------
 #
 # Made with love by Fecton
-# https://www.github.com/fecton
+# alytvynenko.online
+# github.com/fecton
 #
 # ------------------------------
 # Enjoy using! ^_^

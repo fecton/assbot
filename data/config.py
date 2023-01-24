@@ -1,17 +1,24 @@
 import logging.config
 
-from os import getenv
+import os
 from dotenv import load_dotenv
 from json import loads
 from colorama import Fore, Back, Style
+
+from pathlib import Path, PurePath
+
 
 def get_content(filename: str) -> dict:
     """
     Takes a filename (path) and returns its content in a dictionary
     """
-    with open(filename, encoding='utf-8') as f:
-        t = loads(f.read())
-    return t
+    try:
+        filename = PurePath(filename, Path(filename))
+        with open(filename, encoding='utf-8') as f:
+            return loads(f.read())
+    except FileNotFoundError as err:
+        print("[ERROR] %s\n%s" % (err, filename))
+        exit(-1)
 
 # LOADS DATA FROM JSON
 
@@ -46,8 +53,8 @@ load_dotenv()
 logger.debug("Env variables loaded successfully!")
 
 try:
-    TOKEN = getenv("TOKEN")
-    OWNER = getenv("OWNER")
+    TOKEN = os.getenv("TOKEN")
+    OWNER = os.getenv("OWNER")
 
     if TOKEN is None:
         raise TypeError
