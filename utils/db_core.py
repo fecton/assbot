@@ -1,11 +1,10 @@
 import sqlite3
 from typing import Union
-from data.structures import ReportStructure
+from config import ReportStructure, DB_NAME
 
 
 class DbCore:
     def __init__(self) -> None:
-        from data.config import DB_NAME
         self._path_to_db = DB_NAME
 
     @property

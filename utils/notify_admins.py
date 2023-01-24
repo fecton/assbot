@@ -1,9 +1,8 @@
 from time import asctime
 from aiogram import Dispatcher
 from aiogram.utils.markdown import escape_md as esc
-from data.config import logger
 
-from data.config import SUPER_USERS, long_messages
+from cfg import logger, SUPER_USERS, long_messages
 
 notify_m = long_messages["notify_admins"]
 
