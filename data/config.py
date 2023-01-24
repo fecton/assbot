@@ -13,10 +13,14 @@ def get_content(filename: str) -> dict:
     """
     Takes a filename (path) and returns its content in a dictionary
     """
-    filename = PurePath(assbot_path, Path(filename))
-    with open(filename) as f:
-        t = loads(f.read())
-    return t
+    try:
+        filename = PurePath(assbot_path, Path(filename))
+        with open(filename) as f:
+            t = loads(f.read())
+        return t
+    except FileNotFoundError as err:
+        print("[ERROR] %s" % err)
+        print("Current path: %s" % assbot_path.absolute())
 
 # LOADS DATA FROM JSON
 

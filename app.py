@@ -14,6 +14,7 @@
 from aiogram import Dispatcher, executor
 
 import middlewares
+import os
 from utils.start_setup import on_startup_notify, set_default_commands
 from handlers import dp
 from loader import logger
@@ -26,5 +27,8 @@ async def on_startup(dp: Dispatcher):
     await on_startup_notify(dp)
 
 
-if __name__ == "__main__":
-    executor.start_polling(dp, on_startup=on_startup, skip_updates=True)
+if 'ASSBOT_DOCKER' in os.environ:
+    os.chdir('/usr/games/assbot')
+
+    if __name__ == "__main__":
+        executor.start_polling(dp, on_startup=on_startup, skip_updates=True)
