@@ -7,16 +7,13 @@ from colorama import Fore, Back, Style
 
 from pathlib import Path, PurePath
 
-absolute_path = Path().absolute()
-
-while absolute_path.name != 'assbot':
-    absolute_path = absolute_path.parent
-
-
 def get_content(filename: str) -> dict:
     """
     Takes a filename (path) and returns its content in a dictionary
     """
+    absolute_path = Path().absolute()
+    while absolute_path.name != 'assbot':
+        absolute_path = absolute_path.parent
     filename = Path(PurePath(absolute_path), PurePath(filename))
 
     try:
@@ -24,7 +21,7 @@ def get_content(filename: str) -> dict:
             return loads(f.read())
     except FileNotFoundError as err:
         print("[ERROR] %s\n%s" % (err, filename))
-        exit(-1)
+        return None
 
 # LOADS DATA FROM JSON
 
