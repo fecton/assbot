@@ -1,5 +1,4 @@
 import sqlite3
-from sqlite3.dbapi2 import connect
 from typing import Union
 from data.structures import ReportStructure
 

@@ -13,7 +13,6 @@ def get_content(filename: str) -> dict:
     Takes a filename (path) and returns its content in a dictionary
     """
     try:
-        filename = PurePath(filename, Path(filename))
         with open(filename, encoding='utf-8') as f:
             return loads(f.read())
     except FileNotFoundError as err:
