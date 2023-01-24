@@ -3,10 +3,9 @@ from aiogram.utils.markdown import escape_md as esc
 
 from loader import dp, db
 
-from data.config import SUPER_USERS, USER_RATE_LIMIT, long_messages
-from data.functions import user_input
-from data.structures import ReportStructure
+from config import SUPER_USERS, USER_RATE_LIMIT, long_messages, ReportStructure
 
+from utils import user_input
 from utils.set_rate_limit import rate_limit
 
 errors_m = long_messages["errors"]

@@ -26,7 +26,11 @@ async def bot_left(message: types.Message):
     chat_id = message.chat.id
 
     db = DbCore()
-    db.execute("DROP TABLE `%d`" % chat_id)
+    try:
+        db.execute("DROP TABLE `%d`" % chat_id)
+    except sqlite3.OperationalError:
+        return
+
     try:
         db.execute(f"DELETE FROM `groups_name` WHERE group_id={chat_id}", commit=True)
     except sqlite3.OperationalError:

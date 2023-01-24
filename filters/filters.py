@@ -1,7 +1,6 @@
-
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
-from data.config import SUPER_USERS
+from config import SUPER_USERS
 from loader import dp
 
 
