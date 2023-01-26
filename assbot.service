@@ -5,10 +5,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
-Group=root 
-WorkingDirectory=/usr/games/assbot
-ExecStart=python3 /usr/games/assbot/app.py
+User=ubuntu
+Group=ubuntu 
+WorkingDirectory=/home/ubuntu/assbot
+ExecStart=python3 /home/ubuntu/assbot/app.py
 Restart=always
 RestartSec=5
 Environment=
