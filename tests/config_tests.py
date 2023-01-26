@@ -26,3 +26,5 @@ def test_2():
     assert get_content('tests/test.json')["value"] == 'test value'
 
 
+test_1()
+test_2()
