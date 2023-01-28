@@ -17,10 +17,11 @@ from utils import AssCore
 
 from config import USER_RATE_LIMIT, IS_DEBUG, long_messages, LUCK_win_emojis, LUCK_fail_emojis, STATISTIC_top_emojis
 
-errors_m = long_messages["errors"]
+errors_m        = long_messages["errors"]
+default_delay   = 10
 
 
-async def answer(message: types.Message, t: str, delay: int = 3):
+async def answer(message: types.Message, t: str, delay: int = default_delay):
     """
     message.answer with timeout and auto deletion the message
 
