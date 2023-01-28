@@ -8,17 +8,28 @@ from utils.set_rate_limit import rate_limit
 
 from keyboards.inline import about_keyboard
 
+from .funcs import answer
+from filters import IsGroup
+
 
 @rate_limit(USER_RATE_LIMIT)
 @dp.message_handler(CommandStart())
 async def send_start(message: types.Message):
-    await message.answer(esc(long_messages["start"]))
+    is_private = not await(IsGroup().check(message))
+    if is_private:
+        await message.answer(esc(long_messages["start"]))
+    else:
+        await answer(message, esc(long_messages["start"]))
 
 
 @rate_limit(USER_RATE_LIMIT)
 @dp.message_handler(CommandHelp())
 async def send_help(message: types.Message):
-    await message.answer(esc(long_messages["help"]))
+    is_private = not await(IsGroup().check(message))
+    if is_private:
+        await message.answer(esc(long_messages["help"]))
+    else:
+        await answer(message, esc(long_messages["help"]))
 
 
 @rate_limit(USER_RATE_LIMIT)
