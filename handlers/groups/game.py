@@ -1,5 +1,4 @@
 import sqlite3
-import asyncio
 
 from aiogram import types
 from aiogram.utils.markdown import bold, italic, code
@@ -16,37 +15,9 @@ from utils.set_rate_limit import rate_limit
 from utils import AssCore
 
 from config import USER_RATE_LIMIT, IS_DEBUG, long_messages, LUCK_win_emojis, LUCK_fail_emojis, STATISTIC_top_emojis
+from .funcs import answer, reply
 
 errors_m        = long_messages["errors"]
-default_delay   = 10
-
-
-async def answer(message: types.Message, t: str, delay: int = default_delay):
-    """
-    message.answer with timeout and auto deletion the message
-
-    message: a message taked by handler
-    t: text
-    delay: timeout for message
-    """
-
-    sentM = (await message.answer(t))
-    await asyncio.sleep(delay)
-    await sentM.delete()
-
-
-async def reply(message: types.Message, t: str, delay: int = 3):
-    """
-    message.reply with timeout and auto deletion the message
-
-    message: a message taked by handler
-    t: text
-    delay: timeout for message
-    """
-
-    sentM = (await message.reply(t))
-    await asyncio.sleep(delay)
-    await sentM.delete()
 
 
 @rate_limit(USER_RATE_LIMIT*2)
@@ -130,6 +101,7 @@ async def ass(message: types.Message):
         t = esc(t)
 
         await reply(message, t)
+
 
 @rate_limit(USER_RATE_LIMIT*10)
 @dp.message_handler(IsGroup(), commands="luck")
@@ -218,7 +190,6 @@ async def is_lucky(message: types.Message):
         db.execute(query, commit=True)
 
 
-# a user leaves the game
 @rate_limit(USER_RATE_LIMIT*3)
 @dp.message_handler(IsGroup(), commands="leave")
 async def leave(message: types.Message):
@@ -252,7 +223,6 @@ async def leave(message: types.Message):
     await reply(message, t)
 
 
-# show statistics of playing user
 @rate_limit(USER_RATE_LIMIT*2)
 @dp.message_handler(IsGroup(), commands="statistic")
 async def statistic(message: types.Message):
