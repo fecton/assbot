@@ -1,107 +1,105 @@
 {
-	"confirmation": {
-		"short": "y",
-		"long" : "yes"
-	},
+	"start": "👋 Welcome to our cohort, dude/girl!\nThis bot will help you spend your free time playing with the size of your fruit. Participate soon, buddy, and don't hesitate, write /ass",
 
-    "start": "Salut the boy/girl!\nThis boy will help you to have a good with your friends in a competition. Let's start, write /ass!",
-
-    "help": "Don't worry, here it is:\n\n/ass - start the game\n/luck - casino\n/help - this message\n/leave - leave the game\n/r your text - send a report to bot's owner\n/statistic - rating of players\n/about - about the developer",
+	"help": "Don't worry, here are all the commands:\n----------------------\n🍑 /ass — start the game\n🎰 /luck — casino\n❔  /help — this help\n🚶‍♂️ /leave — leave the game\n🙋‍♂️ /r remove Russian language completely — report a flaw or idea\n📊 /statistic — player rating\n\n 👨‍💻 /about — about the developer\n ----------------------\nIf you want the bot to delete user commands after processing - make the bot an admin ♥",
 
 	"admin": {
-		"help": "God mode is enabled\n\nUse 'self' for current group/dialog, for example: /bl self\n\n/bl group_id - shows blocked users in a group\n/ub group_id user_id - unban a user in a group\n/ban group_id user_id - ban a user in a group\n/show - show users in a group\n/reports - shows short reports\n/dreports - shows detailed reports\n/groups - shows all groups\n/clear - clear reports\n/notify - send a message to all groups",
+		"help": "Batch mode:\n----------------------\n Instead of arguments, you can use the parameter 'self'\n /bl group_id — show blacklisted players\n /ub group_id user_id — unban a player\n /ban group_id user_id — ban a jerk\n /show group_id — player list by group\n /reports — show reports\n /dreports — show detailed reports\n /groups — show all groups\n /clear — delete all reports\n /notify — send a message to groups\n ----------------------",
 		"groups": "GROUPS",
-		"current_group": "The current group: ",
-		"blacklisted_struct": "ID: USERNAME: FIRSTNAME",
-		"totally": "Totally: ",
+		"current_group": "👥 Group: ",
+		"blacklisted_struct": "ID : username : player name\n\n",
+		"totally": "\n📌 Totally: ",
 		"one_player": "1 player",
-		"many_player": "%d players",
-		"banned": "The user's ass was banned!",
-		"unbanned": "Now the user could return to the game",
-		"isnt_banned": "The user wasn't banned!",
-		"reports_struct": "FIRSTNAME : MESSAGE",
-		"dreports_struct": "ID:NICKNAME:FIRSTNAME:LENGTH:SPAM:ALLOW_PLAY",
-		"gotten_report": "[R] Got message from %s, for details /reports, /dreports"
-	},
-
+		"many_players": "%d players",
+		"banned": "✅ User banned!",
+		"unbanned": "✅ User unbanned!",
+		"isnt_banned": "❌ User is not banned!",
+		"reports_struct": "Name:Message\n\n",
+		"dreports_struct": "Group ID:Group Name:Player ID:Username:Name:Message\n\n",
+		"empty_reports": "⛔️ No reports yet",
+		"reports_cleaned": "✅ Reports cleaned!",
+		"group_struct": "ID:Username:Name:Length:Spam:Playing possibility\n\n",
+		"gotten_report": "[R] Report received from %s, more info: /reports, /dreports"
+		},
+	
 	"about": "AssBot v%s GNU Licence 2022",
 
-    "links": {
+	"links": {
 		"website": "https://alytvynenko.online",
 		"github": "https://github.com/fecton",
 		"telegram_channel": "https://t.me/varlife"
 	},
-
-    "spam": ", hey, dude, you may think it is funny but not for me :D",
-
-    "errors": {
-		"not_registered": "You are not registered yet!",
-		"no_players": "No players! Become the first!",
-		"no_group": "No groups",
-		"no_users": "No users",
-		"unknown_group": "An unknown group!",
-		"unknown_user": "An unknown user!",
+	
+	"spam": ", I increase your ass, and you spam me. It's not sweet for me to constantly measure your ass. Okay, buddy, now you won't annoy me - you're in mute.",
+	
+	"errors": {
+		"not_registered": "You are not registered in the game!",
+		"no_players": "No players yet! Be the first!",
+		"no_group": "No groups yet!",
+		"no_users": "No users!",
+		"unknown_group": "Unknown group!",
+		"unknown_user": "Unknown user!",
 		"illegal_format": "Illegal format!"
 	},
 
 	"notify": {
-		"enter_message": "[NOTIFY] Okay, enter your text in a single message",
-		"are_you_sure": "[NOTIFY] Are your sure? y/n (yes/no)",
-		"success": "[NOTIFY] The message was sent to groups!",
-		"cancel": "[NOTIFY] The procedure canceled"
+		"enter_message": "😇 Please enter some news in one message",
+		"are_you_sure": "Are you sure about your message? y/n (yes/no)",
+		"success": "The message was sent to the groups!",
+		"cancel": "The procedure has been canceled!"
 	},
 
 	"ass": {
-		"first_start": "Welcum dude!",
-		"blacklisted": "%s, dude, you are banned"
-	},
-
-	"ass_main": {
-		"almost_zero": "%s, wait a second",
-		"hours_zero": "%s, wait %d minutes",
-		"minutes_zero": "%s, wait %d hours",
-		"hours_minutes": "%s, wait %d hours and %d minutes",
-		"your_ass": "%s your ass",
-		"didn't_change": "your ass didn't changed",
-		"icreased": "incresed by %d cm",
-		"disappeared": "your ass was disappear",
-		"decreased": "decreased by %d cm",
-
-		"equals_zero": "Now it equals zero",
-		"greater_than_zero": "Now it equals %d cm"
-	},
-
-	"luck": {
-		"tiny_ass": "Hey, dude, your ass isn't big enough, try after 100 cm",
-		"won" : "%s has a prize, %s your prize: %d cm",
-		"fail" : "%s failed, %s your fail: %d cm",
-		"continue_after_a_week": "Continue after a week",
-		"time_isnt_passed": "Time isn't passed, come back later"
+		"first_start": "👋 Welcome to our cohort, guy/girl!\n",
+		"blacklisted": "%💢 %s, buddy, you already got it, get out of here"
 	},
 	
+	"ass_main": {
+		"almost_zero": "%s, I'm getting the measuring devices, wait a moment",
+		"hours_zero": "%s, you already played! Wait %d minutes",
+		"minutes_zero": "%s, you already played! Wait %d hours",
+		"hours_minutes": "%s, you already played! Wait %d hours and %d minutes",
+		"your_ass": "%s, your butt ",
+		"didn't_change": "did not change in size. ",
+		"icreased": "grew by %d cm! Now your butt is just explosive. ",
+		"disappeared": "disappeared! ",
+		"decreased": "decreased by %d cm! Now your butt is not so fine. ",
+	
+		"equals_zero": "Now you don't have a butt. ",
+		"greater_than_zero": "\nYour butt is now %d cm. "
+	},
+	
+	"luck": {
+		"tiny_ass": "Whoa, buddy, your butt is not big enough yet, guide after 100 cm",
+		"won" : "%s WON!📈\n\n%s Your prize: %d cm\n\n",
+		"fail": "%s LOST!📉\n\n%s You lost %d cm\n\n",
+		"continue_after_a_week": "Continue playing after a week!",
+		"time_isnt_passed": "Kid, time hasn't passed yet! Try after "
+	},
+
 	"leave": {
-		"nope": "Nope, it won't be :)",
-		"so_sad": "You leaved the game, so sadly :_c"
+		"nope": "No, buddy, that won't work 😏",
+		"so_sad": "You left the game! Such a shame such a nice tail"
 	},
-
+	
 	"statistic": {
-		"header": "TOP",
-		"blacklisted": "%s is banned",
-		"zero_king": "%s Zero king %s",
-		"king": "%s King %s - %s",
-		"zero_ass": "%d. %s — zero ass",
-		"positive_ass": "%d. %s — %d cm"
+		"header": "📊 Player rating:\n\n",
+		"blacklisted": "💢 %s remained without a tail due to spam\n",
+		"zero_king": "     %s Tail-less king %s\n\n",
+		"king": "     %s King %s — %d cm\n\n",
+		"zero_ass": "%d. %s — has no tail\n",
+		"positive_ass": "%d. %s — %d cm\n"
 	},
-
+	
 	"commands": {
-		"start": "say hi",
+		"start": "greet",
 		"ass": "play",
 		"luck": "casino",
 		"leave": "leave the game",
 		"statistic": "rating",
-		"about": "about developer",
-		"help": "manual"
+		"about": "about the developer",
+		"help": "help"
 	},
-
-	"notify_admins": "Hi! '%s' is ok!\nRuntime: %s"
-}
+	
+	"notify_admins": "Glory to Ukraine!🇺🇦\nBot '%s' successfully launched!\nLaunch time: %s"
+}	
