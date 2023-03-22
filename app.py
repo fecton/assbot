@@ -18,6 +18,7 @@ from utils.start_setup import on_startup_notify, set_default_commands
 from handlers import dp
 from loader import logger
 
+
 async def on_startup(dp: Dispatcher):
     middlewares.setup(dp)
     logger.debug('Setting up default commands...')

@@ -7,6 +7,7 @@ from colorama import Fore, Back, Style
 
 from pathlib import Path, PurePath
 
+
 def get_content(filename: str) -> dict:
     """
     Takes a filename (path) and returns its content in a dictionary
@@ -25,8 +26,10 @@ def get_content(filename: str) -> dict:
 
 # LOADS DATA FROM JSON
 
+
 # global varibles
-__version__, DB_NAME, USER_RATE_LIMIT, IS_DEBUG, LANGUAGE = get_content('config/cfg-json/global.json').values()
+__version__, DB_NAME, USER_RATE_LIMIT, IS_DEBUG, LANGUAGE = get_content(
+    'config/cfg-json/global.json').values()
 
 # long messages
 long_messages = get_content(f"config/languages-json/{LANGUAGE}.json")
@@ -36,7 +39,8 @@ long_messages["about"] %= __version__
 LOGGING_CONFIG = get_content('config/cfg-json/logger.json')
 
 # emojis for /statistic
-LUCK_win_emojis, LUCK_fail_emojis, STATISTIC_top_emojis = get_content('config/languages-json/emojis.json').values()
+LUCK_win_emojis, LUCK_fail_emojis, STATISTIC_top_emojis = get_content(
+    'config/languages-json/emojis.json').values()
 
 
 if not IS_DEBUG:

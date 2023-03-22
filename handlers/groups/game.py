@@ -17,10 +17,10 @@ from utils import AssCore
 from config import USER_RATE_LIMIT, IS_DEBUG, long_messages, LUCK_win_emojis, LUCK_fail_emojis, STATISTIC_top_emojis
 from .funcs import answer, reply
 
-errors_m        = long_messages["errors"]
+errors_m = long_messages["errors"]
 
 
-@rate_limit(USER_RATE_LIMIT*2)
+@rate_limit(USER_RATE_LIMIT * 2)
 @dp.message_handler(IsGroup(), commands="ass")
 async def ass(message: types.Message):
     """
@@ -32,12 +32,12 @@ async def ass(message: types.Message):
     ass_m = long_messages["ass"]
 
     # takes user info from message
-    group_id   = message.chat.id
-    user_id    = message.from_user.id
-    username   = message.from_user.username
+    group_id = message.chat.id
+    user_id = message.from_user.id
+    username = message.from_user.username
     first_name = message.from_user.first_name
 
-    # combine sql query and run 
+    # combine sql query and run
     query = """
         SELECT * FROM `%d` WHERE user_id=%d
     """ % (group_id, user_id)
@@ -80,7 +80,6 @@ async def ass(message: types.Message):
                     (group_id, username, first_name, user_id)
             db.execute(query, commit=True)
 
-
         if ass_info.blacklisted:
             t = ass_m["blacklisted"] % first_name
         else:
@@ -103,7 +102,7 @@ async def ass(message: types.Message):
         await reply(message, t)
 
 
-@rate_limit(USER_RATE_LIMIT*10)
+@rate_limit(USER_RATE_LIMIT * 10)
 @dp.message_handler(IsGroup(), commands="luck")
 async def is_lucky(message: types.Message):
     """
@@ -149,11 +148,13 @@ async def is_lucky(message: types.Message):
         k_fail = 0.5   # 50%
 
         if winrate >= randint(1, 100):
-            t = (esc(luck_m["won"]) % (bold(firstname), choice(LUCK_win_emojis), length*k_win-length))
+            t = (esc(luck_m["won"]) % (bold(firstname), choice(
+                LUCK_win_emojis), length * k_win - length))
 
             length *= k_win
         else:
-            t = (esc(luck_m["fail"]) % (bold(firstname), choice(LUCK_fail_emojis), length*k_fail))
+            t = (esc(luck_m["fail"]) % (bold(firstname),
+                 choice(LUCK_fail_emojis), length * k_fail))
 
             length -= length * k_fail
 
@@ -178,7 +179,8 @@ async def is_lucky(message: types.Message):
         days_left = ceil(int(luck_timeleft - time()) / 86400)
         # answer with a count of days
 
-        t = esc(luck_m["time_isnt_passed"] + f"{'1 день' if days_left == 1 else f'{days_left} дні'}")
+        t = esc(luck_m["time_isnt_passed"] +
+                f"{'1 день' if days_left == 1 else f'{days_left} дні'}")
 
         await reply(message, t)
 
@@ -190,7 +192,7 @@ async def is_lucky(message: types.Message):
         db.execute(query, commit=True)
 
 
-@rate_limit(USER_RATE_LIMIT*3)
+@rate_limit(USER_RATE_LIMIT * 3)
 @dp.message_handler(IsGroup(), commands="leave")
 async def leave(message: types.Message):
     leave_m = long_messages["leave"]
@@ -223,7 +225,7 @@ async def leave(message: types.Message):
     await reply(message, t)
 
 
-@rate_limit(USER_RATE_LIMIT*2)
+@rate_limit(USER_RATE_LIMIT * 2)
 @dp.message_handler(IsGroup(), commands="statistic")
 async def statistic(message: types.Message):
     """
@@ -257,9 +259,11 @@ async def statistic(message: types.Message):
             output_message = (stat_m["blacklisted"] % user_data.name)
         elif i == 0:
             if user_data.length == 0:
-                output_message += (stat_m["zero_king"] % (STATISTIC_top_emojis[i]+" ", user_data.name))
+                output_message += (stat_m["zero_king"] %
+                                   (STATISTIC_top_emojis[i] + " ", user_data.name))
             else:
-                output_message += (stat_m["king"] % (STATISTIC_top_emojis[i], user_data.name, user_data.length))
+                output_message += (stat_m["king"] %
+                                   (STATISTIC_top_emojis[i], user_data.name, user_data.length))
 
             continue
         elif i < len(STATISTIC_top_emojis):
@@ -268,7 +272,8 @@ async def statistic(message: types.Message):
         if user_data.length == 0:
             output_message += (stat_m["zero_ass"] % (i, user_data.name))
         else:
-            output_message += (stat_m["positive_ass"] % (i, user_data.name, user_data.length))
+            output_message += (stat_m["positive_ass"] %
+                               (i, user_data.name, user_data.length))
 
     output_message = esc(output_message)
     await reply(message, output_message)

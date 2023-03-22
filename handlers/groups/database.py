@@ -18,7 +18,8 @@ async def bot_joined(message: types.Message):
         return
     db.insert_into_groups_name((group_id, message.chat.title))
 
-    logger.debug(f"The table with name '{group_id}' ({message.chat.title}) created successfully!")
+    logger.debug(
+        f"The table with name '{group_id}' ({message.chat.title}) created successfully!")
 
 
 @dp.message_handler(IsLeft(), content_types="left_chat_member")
@@ -32,11 +33,14 @@ async def bot_left(message: types.Message):
         return
 
     try:
-        db.execute(f"DELETE FROM `groups_name` WHERE group_id={chat_id}", commit=True)
+        db.execute(
+            f"DELETE FROM `groups_name` WHERE group_id={chat_id}",
+            commit=True)
     except sqlite3.OperationalError:
         return
 
     logger.debug(f"The group {chat_id} has deleted!")
+
 
 @dp.message_handler(IsUser(), content_types="left_chat_member")
 async def user_left_the_group_and_game(message: types.Message):
@@ -47,4 +51,3 @@ async def user_left_the_group_and_game(message: types.Message):
     db.execute(f"DELETE FROM `{chat_id}` WHERE user_id={user_id}", commit=True)
 
     logger.debug(f"The user '{user_id}' from '{chat_id}'")
-

@@ -60,8 +60,3 @@ class IsGroup(BoundFilter):
         if message.chat.type != types.ChatType.PRIVATE:
             return True
         return False
-
-
-
-
-

@@ -17,6 +17,7 @@ def test_1():
     message.text = "/remove_this_user_please "
     assert user_input(message, "/remove_this_user_please") == ""
 
+
 def test_2():
     """
     Defautl test for get_content from the config file

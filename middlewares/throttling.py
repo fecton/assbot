@@ -19,26 +19,30 @@ class ThrottlingMiddleware(BaseMiddleware):
         self.prefix = key_prefix
         super(ThrottlingMiddleware, self).__init__()
 
-    # process a message
+
     async def on_process_message(self, message: types.Message, data: dict):
-        # get current handler and dispatcher state
         handler = current_handler.get()
         dispatcher = Dispatcher.get_current()
 
         # if handler exists that try to get attributes
         if handler:
             limit = getattr(handler, "throttling_rate_limit", self.rate_limit)
-            key = getattr(handler, "throttling_key", f"{self.prefix}_{handler.__name__}")
+            key = getattr(
+                handler,
+                "throttling_key",
+                f"{self.prefix}_{handler.__name__}")
         # else it sets itself attributes
         else:
             limit = self.rate_limit
             key = f"{self.prefix}_message"
         # is message throttled (is flood)
         try:
-            await dispatcher.throttle(key, rate=limit)  # checks else it raises an exception
+            # checks else it raises an exception
+            await dispatcher.throttle(key, rate=limit)
         except Throttled as t:
-            is_not_admin = not (await IsAdmin().check(message))  # user is not an admin?
-            if is_not_admin: # if not admin
+            # user is not an admin?
+            is_not_admin = not (await IsAdmin().check(message))
+            if is_not_admin:
                 await self.message_throttled(message, t)  # wait a little
                 raise CancelHandler()
 

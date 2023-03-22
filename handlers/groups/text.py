@@ -36,7 +36,7 @@ async def send_help(message: types.Message):
 @dp.message_handler(commands="about")
 async def send_about(message: types.Message):
     await message.answer(
-        esc(long_messages["about"]), 
-        disable_web_page_preview=True, 
+        esc(long_messages["about"]),
+        disable_web_page_preview=True,
         reply_markup=about_keyboard,
     )

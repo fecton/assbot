@@ -9,6 +9,7 @@ from config import ReportStructure, DB_NAME, IS_DEBUG, long_messages
 
 assmain_m = long_messages["ass_main"]
 
+
 class DbCore:
     def __init__(self) -> None:
         self._path_to_db = DB_NAME
@@ -26,7 +27,6 @@ class DbCore:
         connection = self.connection
 
         query_output = connection.cursor().execute(sql_query, parameters)
-
 
         if fetchone:
             return query_output.fetchone()
@@ -53,7 +53,6 @@ class DbCore:
 
         self.execute(query, commit=True)
 
-
     def create_reports_table(self) -> None:
         query = """
             CREATE TABLE `reports` (
@@ -67,7 +66,6 @@ class DbCore:
         """
         self.execute(query, commit=True)
 
-
     def create_groups_name_table(self) -> None:
         query = """
             CREATE TABLE `groups_name` (
@@ -77,7 +75,6 @@ class DbCore:
         """
         self.execute(query, commit=True)
 
-
     def insert_into_groups_name(self, parameters: tuple = ()) -> None:
         query = """
             INSERT INTO `groups_name` (group_id, group_name)
@@ -85,9 +82,8 @@ class DbCore:
         """
         self.execute(query, parameters, commit=True)
 
-
     def insert_into_reports(self, rd: ReportStructure) -> None:
-        assert type(rd) == ReportStructure
+        assert isinstance(rd, ReportStructure)
 
         query = "INSERT INTO `reports` (group_id, group_name, user_id, username, name, message) "
         query += f"VALUES ({rd.chat_id}, \"{rd.chat_title}\", {rd.user_id}, \"{rd.user_name}\", \"{rd.user_firstname}\", \"{rd.message}\")"
@@ -101,14 +97,14 @@ class AssCore:
 
     def __init__(self, ass_info: Union[tuple, list]):
 
-        self.id             = ass_info[0]
-        self.username       = ass_info[1]
-        self.name           = ass_info[2]
-        self.length         = ass_info[3]
-        self.endtime        = ass_info[4]
-        self.spamcount      = ass_info[5]
-        self.blacklisted    = ass_info[6]
-        self.luck_timeleft  = ass_info[7]
+        self.id = ass_info[0]
+        self.username = ass_info[1]
+        self.name = ass_info[2]
+        self.length = ass_info[3]
+        self.endtime = ass_info[4]
+        self.spamcount = ass_info[5]
+        self.blacklisted = ass_info[6]
+        self.luck_timeleft = ass_info[7]
 
         self.ass_info = ass_info
 
@@ -140,14 +136,22 @@ class AssCore:
             # append time to wait
             if hours == 0:
                 if minutes == 0:
-                    output_message = (assmain_m["almost_zero"] % (self.username))
+                    output_message = (
+                        assmain_m["almost_zero"] %
+                        (self.username))
                 else:
-                    output_message = (assmain_m["hours_zero"] % (self.username, minutes))
+                    output_message = (
+                        assmain_m["hours_zero"] %
+                        (self.username, minutes))
             else:
                 if minutes == 0:
-                    output_message = (assmain_m["minutes_zero"] % (self.username, hours))
+                    output_message = (
+                        assmain_m["minutes_zero"] %
+                        (self.username, hours))
                 else:
-                    output_message = (assmain_m["hours_minutes"] % (self.username, hours, minutes))
+                    output_message = (
+                        assmain_m["hours_minutes"] %
+                        (self.username, hours, minutes))
 
             db.execute("""
                 UPDATE `%d` SET spamcount=%d WHERE user_id=%d
@@ -171,7 +175,8 @@ class AssCore:
                 if self.length + tmp_length <= 0:
                     output_message += assmain_m["disappeared"]
                 else:
-                    output_message += (assmain_m["decreased"] % (tmp_length * -1))
+                    output_message += (assmain_m["decreased"] %
+                                       (tmp_length * -1))
 
             self.length = self.length + tmp_length
 
@@ -179,9 +184,11 @@ class AssCore:
                 self.length = 0
                 output_message += assmain_m["equals_zero"]
             else:
-                output_message += (assmain_m["greater_than_zero"] % self.length)
+                output_message += (assmain_m["greater_than_zero"] %
+                                   self.length)
 
-            self.endtime = int(time()) + randint(3600, 72000)  # from 1 hour to 20 hours
+            # from 1 hour to 20 hours
+            self.endtime = int(time()) + randint(3600, 72000)
             last_time = self.endtime - int(time())
 
             if last_time >= 0:
@@ -191,7 +198,8 @@ class AssCore:
                 minutes = ((last_time // 60) - (last_time // 3600) * 60) * -1
                 hours = last_time // 3600 * -1
 
-            output_message += "Продовжуй грати через {0} год. {1} хв.".format(hours, minutes)
+            output_message += "Продовжуй грати через {0} год. {1} хв.".format(
+                hours, minutes)
 
             db.execute("""
                     UPDATE `%d` SET length=%d, endtime=%d, spamcount=0 WHERE user_id=%d

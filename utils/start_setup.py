@@ -5,6 +5,7 @@ from config import logger, long_messages, SUPER_USERS
 
 notify_m = long_messages["notify_admins"]
 
+
 async def on_startup_notify(dp: Dispatcher):
     bot_name = (await dp.bot.get_me()).first_name
     for admin in SUPER_USERS:
@@ -19,6 +20,7 @@ async def on_startup_notify(dp: Dispatcher):
 
 c_m = long_messages["commands"]
 
+
 async def set_default_commands(dp: Dispatcher):
     await dp.bot.set_my_commands([
         types.BotCommand("start", c_m["start"]),
@@ -29,4 +31,3 @@ async def set_default_commands(dp: Dispatcher):
         types.BotCommand("about", c_m["about"]),
         types.BotCommand("help", c_m["help"]),
     ])
-

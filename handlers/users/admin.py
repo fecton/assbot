@@ -30,7 +30,6 @@ async def show_admin_help(message: types.Message):
     await message.answer(esc(admin_m["help"]))
 
 
-
 @dp.message_handler(IsAdmin(), commands="notify")
 async def get_message_to_notify(message: types.Message):
     """
@@ -96,7 +95,8 @@ async def show_groups(message: types.Message):
     try:
         groups_info = db.execute(query, fetchall=True)
     except sqlite3.OperationalError:
-        logger.debug("[!] The table `groups_name` doesn't exist or was deleted, created new one")
+        logger.debug(
+            "[!] The table `groups_name` doesn't exist or was deleted, created new one")
 
         db.create_groups_name_table()
         db.insert_into_groups_name((message.chat.id, message.chat.title))
@@ -131,7 +131,7 @@ async def show_blacklisted_users(message: types.Message):
     """
     This function shows all banned users in a group
     """
-    
+
     group_id = user_input(message, "/bl")
 
     if group_id == "self":
@@ -152,7 +152,7 @@ async def show_blacklisted_users(message: types.Message):
     if not users_data:
         await message.answer(esc(errors_m["no_users"]))
     else:
-        output_message = admin_m["current_group"] + code(group_id) + "\n" 
+        output_message = admin_m["current_group"] + code(group_id) + "\n"
         output_message += admin_m["blacklisted_struct"]
 
         users_count = 0
@@ -178,7 +178,7 @@ async def ban(message: types.Message):
     This header reads "/ban" string and after a space user id
     after that updates user's column "blacklisted" to 1 (user will be banned)
     """
-    
+
     if message.reply_to_message is not None:
         user_to_ban = message.reply_to_message.from_user.id
         ban_group = message.chat.id
@@ -214,7 +214,8 @@ async def ban(message: types.Message):
             user_to_ban = info[1]
 
         if info[0] != "self" and info[1] != "self":
-            if re.search(r"[A-Za-z]", info[0]) or re.search(r"[A-Za-z]", info[1]):
+            if re.search(r"[A-Za-z]", info[0]
+                         ) or re.search(r"[A-Za-z]", info[1]):
                 await message.answer(esc(errors_m["illegal_format"]))
                 return
 
@@ -304,7 +305,7 @@ async def show_reports(message: types.Message):
     """
     This function show all rows from table `reports` and send it in one message
     """
-    
+
     query = "SELECT * FROM `reports`"
     users = db.execute(query, fetchall=True)
 
@@ -324,7 +325,7 @@ async def show_detailed_reports(message: types.Message):
     """
     This function show all rows from table `reports` and send it in one message
     """
-    
+
     query = "SELECT * FROM `reports`"
     users = db.execute(query, fetchall=True)
 
@@ -346,7 +347,7 @@ async def clear_reports(message: types.Message):
     """
     This function delete all writes in the table `reports` by
     """
-    
+
     query = """
         DELETE FROM `reports`
     """
@@ -363,7 +364,7 @@ async def show_users(message: types.Message):
     This function send message with all user from group via group id
     :group_id: Yeah, it's Group_id
     """
-    
+
     group_id = user_input(message, "/show")
 
     if group_id == "self":
@@ -391,8 +392,8 @@ async def show_users(message: types.Message):
                 blacklisted = "❌"
             else:
                 blacklisted = "✅"
-            
-            if(user.username == "None"):
+
+            if (user.username == "None"):
                 output_message += f" ▶️ {code(user.id)} : {bold('Відсутній')} : {bold(user.name)}"
             else:
                 output_message += f" ▶️ {code(user.id)} : {bold('@'+user.username)} : {bold(user.name)}"

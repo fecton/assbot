@@ -6,6 +6,7 @@ from cfg import logger, SUPER_USERS, long_messages
 
 notify_m = long_messages["notify_admins"]
 
+
 async def on_startup_notify(dp: Dispatcher):
     bot_name = (await dp.bot.get_me()).first_name
     for admin in SUPER_USERS:

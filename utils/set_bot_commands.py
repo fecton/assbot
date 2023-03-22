@@ -3,6 +3,7 @@ from cfg import long_messages
 
 c_m = long_messages["commands"]
 
+
 async def set_default_commands(dp: Dispatcher):
     await dp.bot.set_my_commands([
         types.BotCommand("start", c_m["start"]),

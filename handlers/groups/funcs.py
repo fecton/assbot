@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import types
 
-default_delay   = 10
+default_delay = 10
 
 
 async def answer(message: types.Message, t: str, delay: int = default_delay):
