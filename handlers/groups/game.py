@@ -109,7 +109,7 @@ async def is_lucky(message: types.Message):
     """
     This command is try user's luck
     If user wins, user will get 200% of its length
-    If user fails, user will last 60% of its length
+    If user fails, user will last 50% of its length
     """
 
     luck_m = long_messages["luck"]
