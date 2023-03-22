@@ -16,8 +16,6 @@ from filters import IsGroup
 @dp.message_handler(CommandStart())
 async def send_start(message: types.Message):
     is_private = not await(IsGroup().check(message))
-    print(is_private)
-    print(message)
     if is_private:
         await message.answer(esc(long_messages["start"]))
     else:
