@@ -1,9 +1,0 @@
-# assbot: to_run
-FROM assbot:default
-
-COPY ../.env /usr/games/assbot
-
-ENV ASSBOT_DOCKER=/usr/games/assbot
-WORKDIR ${ASSBOT_DOCKER}
-
-CMD ["python3", "/usr/games/assbot/app.py", "-DFOREGROUND"]
